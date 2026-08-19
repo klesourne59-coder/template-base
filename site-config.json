@@ -1,0 +1,86 @@
+{
+  "identity": {
+    "name": "Le Grand Domaine",
+    "slogan": "Hôtel & Restaurant Gastronomique",
+    "description": "Un havre de paix au cœur de la nature, alliant luxe et gastronomie.",
+    "logo": "assets/images/logo.png",
+    "favicon": "assets/images/favicon.ico",
+    "contact": {
+      "phone": "+33 1 23 45 67 89",
+      "email": "contact@legranddomaine.fr",
+      "address": "12 Avenue des Monts, 75000 Paris",
+      "hours": "7j/7 — 07h00 à 23h00"
+    },
+    "social": {
+      "instagram": "https://instagram.com",
+      "facebook": "https://facebook.com",
+      "tiktok": "",
+      "x": ""
+    }
+  },
+  "theme": {
+    "colors": {
+      "primary": "#1B2A4A",
+      "secondary": "#C5A059",
+      "accent": "#D4AF37",
+      "background": "#FAFAFA",
+      "card": "#FFFFFF",
+      "text": "#222222",
+      "border": "#E5E7EB"
+    },
+    "fonts": {
+      "title": "Playfair Display",
+      "body": "Plus Jakarta Sans"
+    }
+  },
+  "rooms": [
+    {
+      "id": "room-deluxe",
+      "name": "Suite Deluxe Vue Jardin",
+      "description": "Chambre spacieuse avec terrasse privée et lit King Size.",
+      "pricePerNight": 180,
+      "capacity": 2,
+      "surface": 42,
+      "amenities": ["Lit King Size", "Baignoire", "Wi-Fi 6", "Machine Espresso", "Climatisation"],
+      "images": [
+        "assets/images/rooms/deluxe-1.jpg",
+        "assets/images/rooms/deluxe-2.jpg"
+      ]
+    }
+  ],
+  "restaurant": {
+    "categories": [
+      {
+        "id": "entrées",
+        "name": "Entrées",
+        "items": [
+          {
+            "name": "Foie Gras Poêlé",
+            "description": "Chutney de figues de saison et brioche maison.",
+            "price": 24,
+            "image": "assets/images/menu/foie-gras.jpg"
+          }
+        ]
+      }
+    ]
+  },
+  "services": [
+    {
+      "id": "breakfast",
+      "name": "Petit-déjeuner Buffets & Produits Locaux",
+      "description": "Servi chaque matin en salle ou en chambre.",
+      "price": 22,
+      "type": "per_person_per_night"
+    },
+    {
+      "id": "spa",
+      "name": "Accès Spa & Wellness (1h30)",
+      "description": "Sauna, hammam et piscine chauffée.",
+      "price": 45,
+      "type": "fixed"
+    }
+  ],
+  "stripe": {
+    "publicKey": "pk_test_sample"
+  }
+}

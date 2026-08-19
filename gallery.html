@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#081012" />
+    <meta name="robots" content="index, follow" />
+    <meta
+      name="description"
+      content="Galerie photo du Jardin Étoilé : hôtel, gastronomie, cave à vins et spa."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <title>Galerie | Le Jardin Étoilé</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Passer au contenu</a>
+    <div class="page-wrapper">
+      <header class="site-header">
+        <a href="index.html" class="site-logo">
+          <span class="brand-name">Le Jardin Étoilé</span>
+          <span class="brand-subtitle">Hôtel, Spa &amp; Gastronomie</span>
+        </a>
+        <button
+          class="nav-toggle"
+          aria-label="Ouvrir le menu"
+          aria-expanded="false"
+        >
+          <span class="hamburger"></span>
+        </button>
+        <nav
+          id="nav-main"
+          class="nav-list"
+          role="navigation"
+          aria-label="Menu principal"
+        >
+          <a href="index.html">Accueil</a>
+          <a href="menu.html">Menu</a>
+          <a href="reservation.html">Réservation</a>
+          <a href="gallery.html" class="active">Galerie</a>
+          <a href="histoire.html">Histoire</a>
+          <a href="contact.html">Contact</a>
+        </nav>
+      </header>
+
+      <main id="main-content" class="container">
+        <h1>Galerie Photos</h1>
+        <p class="subtitle">
+          Découvrez l'atmosphère du Jardin Étoilé. Cliquez sur une catégorie
+          pour faire défiler les clichés.
+        </p>
+
+        <!-- Bloc explicatif Gastronomie & Cave -->
+        <section class="gallery-intro">
+          <p>
+            Chaque saison, notre Chef et notre sommelier travaillent en étroite
+            collaboration avec des vigneron·nes indépendants et des cavistes
+            passionnés. Notre carte évolue constamment au fil des arrivages et
+            des découvertes pour vous proposer des accords mets et vins
+            d'exception.
+          </p>
+        </section>
+
+        <div class="gallery-filters">
+          <button class="filter-btn active" data-filter="all">Tous</button>
+          <button class="filter-btn" data-filter="hotel">
+            Hôtel &amp; Suites
+          </button>
+          <button class="filter-btn" data-filter="restaurant">
+            Gastronomie &amp; Cave
+          </button>
+          <button class="filter-btn" data-filter="spa">
+            Spa &amp; Détente
+          </button>
+        </div>
+
+        <div class="gallery-grid">
+          <!-- Plats Signatures -->
+          <div
+            class="gallery-item"
+            data-category="restaurant"
+            data-images="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80, https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80, https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=80, https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=800&q=80"
+          >
+            <img
+              src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80"
+              alt="Plats Signatures du Chef"
+              class="lightbox-trigger"
+            />
+            <p>Plats Signatures</p>
+          </div>
+
+          <!-- Cave à Vins (Image corrigée) -->
+          <div
+            class="gallery-item"
+            data-category="restaurant"
+            data-images="https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=800&q=80, https://images.unsplash.com/photo-1516594915697-87eb3b1c14ea?auto=format&fit=crop&w=800&q=80, https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?auto=format&fit=crop&w=800&q=80, https://images.unsplash.com/photo-1558001373-7b93ee48ffa0?auto=format&fit=crop&w=800&q=80"
+          >
+            <img
+              src="https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=800&q=80"
+              alt="Cave à Vins & Grands Crus"
+              class="lightbox-trigger"
+            />
+            <p>Cave &amp; Sélection Sommelier</p>
+          </div>
+
+          <!-- Cocktails -->
+          <div
+            class="gallery-item"
+            data-category="restaurant"
+            data-images="https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=800&q=80, https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=800&q=80, https://images.unsplash.com/photo-1536935338788-846bb9981813?auto=format&fit=crop&w=800&q=80"
+          >
+            <img
+              src="https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=800&q=80"
+              alt="Bar & Cocktails Création"
+              class="lightbox-trigger"
+            />
+            <p>Cocktails &amp; Mixologie</p>
+          </div>
+
+          <!-- Desserts -->
+          <div
+            class="gallery-item"
+            data-category="restaurant"
+            data-images="https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=800&q=80, https://images.unsplash.com/photo-1579372786545-d24232daf58c?auto=format&fit=crop&w=800&q=80, https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=800&q=80"
+          >
+            <img
+              src="https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=800&q=80"
+              alt="Desserts du Chef"
+              class="lightbox-trigger"
+            />
+            <p>Créations Sucrées</p>
+          </div>
+
+          <!-- Chambres & Suites -->
+          <div
+            class="gallery-item"
+            data-category="hotel"
+            data-images="https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=800&q=80, https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=800&q=80, https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80, https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&w=800&q=80"
+          >
+            <img
+              src="https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=800&q=80"
+              alt="Chambres & Suites Prestige"
+              class="lightbox-trigger"
+            />
+            <p>Suites &amp; Chambres</p>
+          </div>
+
+          <!-- Lobby -->
+          <div
+            class="gallery-item"
+            data-category="hotel"
+            data-images="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80, https://images.unsplash.com/photo-1564501049412-61c2a3083791?auto=format&fit=crop&w=800&q=80, https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&q=80"
+          >
+            <img
+              src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80"
+              alt="Réception et Lobby"
+              class="lightbox-trigger"
+            />
+            <p>Lobby &amp; Salons</p>
+          </div>
+
+          <!-- Spa -->
+          <div
+            class="gallery-item"
+            data-category="spa"
+            data-images="https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=800&q=80, https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=800&q=80, https://images.unsplash.com/photo-1519823551278-64ac92734fb1?auto=format&fit=crop&w=800&q=80"
+          >
+            <img
+              src="https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=800&q=80"
+              alt="Espace Spa"
+              class="lightbox-trigger"
+            />
+            <p>Spa &amp; Soins</p>
+          </div>
+
+          <!-- Piscine -->
+          <div
+            class="gallery-item"
+            data-category="spa"
+            data-images="https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=800&q=80, https://images.unsplash.com/photo-1584132967334-10e028bd69f7?auto=format&fit=crop&w=800&q=80, https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?auto=format&fit=crop&w=800&q=80"
+          >
+            <img
+              src="https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=800&q=80"
+              alt="Piscine intérieure"
+              class="lightbox-trigger"
+            />
+            <p>Espace Aquatique</p>
+          </div>
+        </div>
+
+        <!-- Lightbox Modal -->
+        <div id="lightbox-modal" class="lightbox-modal">
+          <button class="lightbox-close" aria-label="Fermer l'aperçu">
+            &times;
+          </button>
+          <button class="lightbox-prev" aria-label="Photo précédente">
+            &#10094;
+          </button>
+          <img id="lightbox-img" src="" alt="Agrandissement photo" />
+          <button class="lightbox-next" aria-label="Photo suivante">
+            &#10095;
+          </button>
+        </div>
+      </main>
+
+      <footer class="footer">
+        <small>© 2026 Le Jardin Étoilé. Tous droits réservés.</small>
+      </footer>
+    </div>
+    <script src="scripts.js" defer></script>
+  </body>
+</html>

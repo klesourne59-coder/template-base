@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Panneau de personnalisation</title>
+    <script>
+      // Sécurité : redirection si non connecté
+      if (sessionStorage.getItem("pro_auth") !== "true") {
+        window.location.href = "login.html";
+      }
+    </script>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        height: 100vh;
+        overflow: hidden;
+        background: #030506;
+        color: #f3f4f6;
+        font-family:
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+      }
+      .panel {
+        width: 380px;
+        min-width: 380px;
+        background: #0b1315;
+        border-right: 1px solid #1e293b;
+        padding: 1.5rem;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+      }
+      .panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+      }
+      .panel-header h2 {
+        margin: 0;
+        font-size: 1.25rem;
+      }
+      .btn-logout {
+        background: transparent;
+        border: 1px solid #334155;
+        color: #94a3b8;
+        padding: 0.35rem 0.75rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.8rem;
+      }
+      .btn-logout:hover {
+        border-color: #ef4444;
+        color: #ef4444;
+      }
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+      }
+      .form-group label {
+        font-size: 0.85rem;
+        color: #94a3b8;
+      }
+      .form-group input[type="text"] {
+        width: 100%;
+        padding: 0.6rem 0.8rem;
+        background: #142123;
+        border: 1px solid #233538;
+        border-radius: 6px;
+        color: #fff;
+        font-size: 0.9rem;
+      }
+      fieldset {
+        border: 1px solid #233538;
+        border-radius: 8px;
+        padding: 1rem;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+      legend {
+        color: #c9a16f;
+        font-size: 0.85rem;
+        padding: 0 0.4rem;
+        font-weight: 600;
+      }
+      .color-row {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+      }
+      .color-row label {
+        font-size: 0.8rem;
+        color: #94a3b8;
+      }
+      .color-picker-group {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+      }
+      .color-picker-group input[type="color"] {
+        -webkit-appearance: none;
+        border: 1px solid #233538;
+        width: 42px;
+        height: 36px;
+        border-radius: 6px;
+        background: transparent;
+        cursor: pointer;
+        padding: 0;
+      }
+      .color-picker-group input[type="text"] {
+        flex: 1;
+      }
+      .form-note {
+        font-size: 0.75rem;
+        color: #64748b;
+      }
+      .panel-footer {
+        margin-top: auto;
+        padding-top: 1rem;
+        border-top: 1px solid #233538;
+      }
+      .btn-primary {
+        background: #c9a16f;
+        color: #000;
+        border: none;
+        padding: 0.75rem 1rem;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        width: 100%;
+      }
+      .btn-primary:hover {
+        background: #d4af37;
+      }
+      .preview-container {
+        flex: 1;
+        height: 100%;
+        background: #000;
+      }
+      iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- PANNEAU LATÉRAL DE CONFIGURATION -->
+    <aside class="panel">
+      <div class="panel-header">
+        <h2>Personnalisation</h2>
+        <button id="logout-btn" class="btn-logout">Déconnexion</button>
+      </div>
+
+      <!-- 1. NOM DE L'ÉTABLISSEMENT -->
+      <div class="form-group">
+        <label for="brand-title">Nom de l'établissement</label>
+        <input
+          type="text"
+          id="brand-title"
+          value="Le Jardin Étoilé"
+          placeholder="Ex: Le Jardin Étoilé"
+        />
+      </div>
+
+      <!-- 2. COULEURS -->
+      <fieldset>
+        <legend>Couleurs du site</legend>
+
+        <div class="color-row">
+          <label for="color-secondary">Couleur d'accentuation</label>
+          <div class="color-picker-group">
+            <input type="color" id="color-secondary" value="#c9a16f" />
+            <input
+              type="text"
+              id="hex-secondary"
+              value="#c9a16f"
+              maxlength="7"
+              readonly
+            />
+          </div>
+        </div>
+
+        <div class="color-row">
+          <label for="color-background">Arrière-plan principal</label>
+          <div class="color-picker-group">
+            <input type="color" id="color-background" value="#081012" />
+            <input
+              type="text"
+              id="hex-background"
+              value="#081012"
+              maxlength="7"
+              readonly
+            />
+          </div>
+        </div>
+
+        <div class="color-row">
+          <label for="color-card">Arrière-plan des cartes</label>
+          <div class="color-picker-group">
+            <input type="color" id="color-card" value="#101a18" />
+            <input
+              type="text"
+              id="hex-card"
+              value="#101a18"
+              maxlength="7"
+              readonly
+            />
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- 3. IMAGES DU SITE -->
+      <fieldset>
+        <legend>Images du site</legend>
+
+        <div class="form-group">
+          <label for="logo-img-url">Logo du restaurant</label>
+          <input
+            type="text"
+            id="logo-img-url"
+            placeholder="https://.../logo.png"
+          />
+          <input
+            type="file"
+            class="file-input"
+            data-target="logo-img-url"
+            accept="image/*"
+            style="font-size: 0.8rem; color: #94a3b8; margin-top: 0.3rem;"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="hero-img-url">Fond de l'en-tête (Hero)</label>
+          <input
+            type="text"
+            id="hero-img-url"
+            placeholder="https://.../hero.jpg"
+          />
+          <input
+            type="file"
+            class="file-input"
+            data-target="hero-img-url"
+            accept="image/*"
+            style="font-size: 0.8rem; color: #94a3b8; margin-top: 0.3rem;"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="dish1-img-url">Photo du Plat N°1</label>
+          <input
+            type="text"
+            id="dish1-img-url"
+            placeholder="https://.../plat1.jpg"
+          />
+          <input
+            type="file"
+            class="file-input"
+            data-target="dish1-img-url"
+            accept="image/*"
+            style="font-size: 0.8rem; color: #94a3b8; margin-top: 0.3rem;"
+          />
+        </div>
+      </fieldset>
+
+      <!-- 4. BOUTON DE SAUVEGARDE -->
+      <div class="panel-footer">
+        <button id="save-btn" class="btn-primary">
+          Enregistrer les modifications
+        </button>
+        <p
+          id="save-status"
+          class="form-note"
+          style="margin-top: 0.5rem; text-align: center;"
+        ></p>
+      </div>
+    </aside>
+
+    <!-- APERÇU DU SITE EN DIRECT (IFRAME) -->
+    <main class="preview-container">
+      <iframe
+        id="preview-iframe"
+        src="../index.html"
+        title="Aperçu du site"
+      ></iframe>
+    </main>
+
+    <script src="../customizer.js"></script>
+  </body>
+</html>

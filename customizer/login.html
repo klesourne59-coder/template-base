@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Espace Professionnel — Connexion</title>
+    <link rel="stylesheet" href="../styles.css" />
+    <style>
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        background: #030506;
+      }
+      .login-card {
+        width: 100%;
+        max-width: 400px;
+        padding: 2.5rem;
+        background: var(--night-card);
+        border: 1px solid var(--border-soft);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-card);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-card">
+      <span class="subtitle">Espace Pro</span>
+      <h2 style="margin-top: 0.4rem;">Connexion</h2>
+      <p class="form-note" style="margin-bottom: 1.5rem;">
+        Accédez au panneau de configuration de votre établissement.
+      </p>
+
+      <form id="login-form">
+        <div class="form-group">
+          <label for="admin-pass">Mot de passe</label>
+          <input
+            type="password"
+            id="admin-pass"
+            required
+            placeholder="••••••••"
+          />
+        </div>
+        <div id="login-error" class="form-error">Mot de passe incorrect.</div>
+        <button
+          type="submit"
+          class="btn-primary"
+          style="width: 100%; margin-top: 0.5rem;"
+        >
+          Se connecter
+        </button>
+      </form>
+    </div>
+
+    <script>
+      // Mot de passe par défaut (à personnaliser)
+      const SECRET_KEY = "admin123";
+
+      document.getElementById("login-form").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const inputPass = document.getElementById("admin-pass").value;
+        const errorEl = document.getElementById("login-error");
+
+        if (inputPass === SECRET_KEY) {
+          sessionStorage.setItem("pro_auth", "true");
+          window.location.href = "index.html";
+        } else {
+          errorEl.classList.add("visible");
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#081012" />
+  <meta name="robots" content="index, follow" />
+  <meta name="description" content="Contactez Le Jardin Étoilé : coordonnées, adresse et formulaire de contact." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <title>Contact | Le Jardin Étoilé</title>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Passer au contenu</a>
+  <div class="page-wrapper">
+    <header class="site-header">
+      <a href="index.html" class="site-logo">
+        <span class="brand-name">Le Jardin Étoilé</span>
+        <span class="brand-subtitle">Hôtel, Spa &amp; Gastronomie</span>
+      </a>
+      <button class="nav-toggle" aria-label="Ouvrir le menu" aria-expanded="false">
+        <span class="hamburger"></span>
+      </button>
+      <nav id="nav-main" class="nav-list" role="navigation" aria-label="Menu principal">
+        <a href="index.html">Accueil</a>
+        <a href="menu.html">Menu</a>
+        <a href="reservation.html">Réservation</a>
+        <a href="gallery.html">Galerie</a>
+        <a href="histoire.html">Histoire</a>
+        <a href="contact.html" class="active">Contact</a>
+      </nav>
+    </header>
+
+    <main id="main-content" class="container">
+      <h1>Contactez-nous</h1>
+      <p class="subtitle">Une question ou une demande spécifique ? Notre équipe vous répond rapidement.</p>
+
+      <div class="grid grid-2 mt-lg">
+        <div class="form-card">
+          <h2>Nos Coordonnées</h2>
+          <p><strong>Adresse :</strong> 124 Avenue des Champs-Élysées, 75008 Paris</p>
+          <p><strong>Téléphone :</strong> +33 1 42 68 55 00</p>
+          <p><strong>Email :</strong> <a href="mailto:contact@hotel-luxe.com">contact@hotel-luxe.com</a></p>
+          <p><strong>Horaires :</strong> Réception ouverte 24h/24 et 7j/7</p>
+        </div>
+
+        <div class="form-card">
+          <h2>Envoyer un message</h2>
+          <form action="success.html" method="GET">
+            <div class="form-group">
+              <label for="name">Nom complet</label>
+              <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+              <label for="email">Adresse email</label>
+              <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+              <label for="message">Votre message</label>
+              <textarea id="message" name="message" rows="5" required></textarea>
+            </div>
+            <button type="submit" class="btn-primary">Envoyer le message</button>
+          </form>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <small>© 2026 Le Jardin Étoilé. Tous droits réservés.</small>
+    </footer>
+  </div>
+  <script src="scripts.js" defer></script>
+</body>
+</html>

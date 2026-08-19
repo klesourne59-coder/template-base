@@ -1,0 +1,101 @@
+====================================================================
+               NOTICE D'UTILISATION & GUIDE DE PRISE EN MAIN
+                 TEMPLATE WEB PREMIUM - LE JARDIN ÉTOILÉ
+====================================================================
+
+Merci d'avoir acheté ce template web complet et responsive !
+Ce guide vous explique pas à pas comment personnaliser votre site 
+(textes, images, tarifs, réservations) et le mettre en ligne facilement.
+
+--------------------------------------------------------------------
+1. STRUCTURE DU DOSSIER
+--------------------------------------------------------------------
+Votre dossier ZIP contient l'ensemble des fichiers nécessaires :
+
+  ├── index.html          --> Page d'accueil principal
+  ├── menu.html           --> Carte du restaurant / Services
+  ├── reservation.html    --> Module de réservation & tarifs
+  ├── gallery.html        --> Galerie photos interactive
+  ├── histoire.html       --> Présentation de l'établissement
+  ├── contact.html        --> Formulaire et coordonnées
+  ├── texte.html          --> Page de texte générique (CGV, mentions...)
+  ├── success.html        --> Page affichée après un paiement réussi
+  ├── styles.css          --> Feuille de style (design et couleurs)
+  ├── scripts.js          --> Logique dynamique (calculateur, filtres, paiement)
+  ├── favicon.svg         --> Icône du site dans l'onglet
+  ├── api/                --> Fonctions serveur (paiement Stripe, emails)
+  ├── admin/              --> Espace d'administration (CMS optionnel)
+  └── NOTICE_UTILISATION.txt
+
+--------------------------------------------------------------------
+2. COMMENT MODIFIER LES TEXTES ET IMAGES
+--------------------------------------------------------------------
+Méthode A : Modification directe (Recommandée)
+1. Ouvrez n'importe quel fichier .html avec un éditeur de texte 
+   (VS Code, Notepad++, ou Bloc-notes).
+2. Repérez les textes entre les balises HTML (ex: <h1>Mon Titre</h1>).
+3. Remplacez le texte par le vôtre et enregistrez le fichier (Ctrl + S).
+
+Pour modifier les images :
+- Remplacez simplement les liens d'images dans le code ou ajoutez vos 
+  propres photos dans un dossier "images/".
+
+--------------------------------------------------------------------
+3. Espace ADMINISTRATION (OPTIONNEL)
+--------------------------------------------------------------------
+Si vous hébergez le site sur Netlify ou Vercel :
+- Accédez à : votre-domaine.com/admin/
+- Connectez-vous pour modifier les éléments clés sans toucher au code.
+
+--------------------------------------------------------------------
+4. MISE EN LIGNE DU SITE (GRATUITE OU SUR VOTRE NOM DE DOMAINE)
+--------------------------------------------------------------------
+Option 1 : Hébergement gratuit en 2 minutes (Vercel ou Netlify)
+1. Créez un compte gratuit sur Vercel.com ou Netlify.com.
+2. Glissez-déposez l'intégralité du dossier dézippé.
+3. Votre site est immédiatement en ligne avec une adresse sécurisée (HTTPS) !
+
+Option 2 : Hébergeur classique (Hostinger, OVH, LWS, PlanetHoster)
+1. Connectez-vous à votre espace FTP (FileZilla) ou au gestionnaire de fichiers.
+2. Envoyez tous les fichiers du dossier dans le répertoire `public_html` ou `www`.
+
+Important : le dossier "api/" contient des fonctions serveur (Node.js).
+Elles ne fonctionnent que sur un hébergeur qui les supporte (Vercel ou
+Netlify) et ne s'exécuteront pas sur un hébergement mutualisé classique
+sans adaptation. Voir section 5 pour leur configuration.
+
+--------------------------------------------------------------------
+5. CONFIGURATION DU PAIEMENT EN LIGNE (STRIPE)
+--------------------------------------------------------------------
+Le module de réservation redirige vos clients vers Stripe Checkout, qui
+collecte lui-même le numéro de carte sur sa propre page sécurisée : ce
+site ne manipule et ne stocke jamais de coordonnées bancaires.
+
+Pour activer les paiements réels :
+1. Créez un compte sur stripe.com et récupérez votre clé secrète
+   (menu Développeurs > Clés API).
+2. Sur votre hébergeur (Vercel ou Netlify), ajoutez ces variables
+   d'environnement dans les réglages du projet :
+     - STRIPE_SECRET_KEY      (clé secrète Stripe)
+     - STRIPE_WEBHOOK_SECRET  (voir étape 3 ci-dessous)
+     - RESEND_API_KEY         (pour l'email de confirmation automatique,
+                                à créer gratuitement sur resend.com)
+3. Dans le tableau de bord Stripe, créez un webhook pointant vers :
+     https://votre-domaine.com/api/webhook
+   en sélectionnant l'événement "checkout.session.completed", puis
+   copiez la clé de signature générée dans STRIPE_WEBHOOK_SECRET.
+4. Les tarifs des chambres et des options se modifient dans le fichier
+   api/create-checkout-session.js (objet ROOM_CATALOG). Si vous changez
+   un prix, reportez la même modification dans scripts.js (objet ROOMS)
+   pour que le tarif affiché au client avant paiement reste exact.
+
+Tant que ces variables ne sont pas configurées, le bouton de réservation
+ne pourra pas créer de session de paiement.
+
+--------------------------------------------------------------------
+6. SUPPORT & ASSISTANCE
+--------------------------------------------------------------------
+Besoin d'aide supplémentaire ou d'une personnalisation sur mesure ?
+N'hésitez pas à nous contacter via la messagerie de la plateforme d'achat.
+
+© Tous droits réservés.

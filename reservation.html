@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#081012" />
+  <meta name="robots" content="index, follow" />
+  <meta name="description" content="Réservez votre chambre, votre suite ou vos options bien-être au Jardin Étoilé." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <title>Réservation | Le Jardin Étoilé</title>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Passer au contenu</a>
+  <div class="page-wrapper">
+    <header class="site-header">
+      <a href="index.html" class="site-logo">
+        <span class="brand-name">Le Jardin Étoilé</span>
+        <span class="brand-subtitle">Hôtel, Spa &amp; Gastronomie</span>
+      </a>
+      <button class="nav-toggle" aria-label="Ouvrir le menu" aria-expanded="false">
+        <span class="hamburger"></span>
+      </button>
+      <nav id="nav-main" class="nav-list" role="navigation" aria-label="Menu principal">
+        <a href="index.html">Accueil</a>
+        <a href="menu.html">Menu</a>
+        <a href="reservation.html" class="active">Réservation</a>
+        <a href="gallery.html">Galerie</a>
+        <a href="histoire.html">Histoire</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+    </header>
+
+    <main id="main-content" class="container">
+      <h1>Réserver votre séjour</h1>
+      <p class="subtitle">Chambres, suites &amp; options bien-être</p>
+
+      <form id="reservation-form" class="form-card mt-lg" novalidate>
+
+        <h2 class="step-title">1. Votre chambre &amp; vos dates</h2>
+        <div class="form-group">
+          <label for="service-type">Chambre ou suite</label>
+          <select id="service-type" name="service-type" required>
+            <option value="" disabled selected>Choisissez une chambre</option>
+            <option value="simple">Chambre Simple — 160 €/nuit</option>
+            <option value="double">Chambre Double — 230 €/nuit</option>
+            <option value="familiale">Chambre Familiale — 310 €/nuit</option>
+            <option value="suite-prestige">Suite Prestige — 420 €/nuit</option>
+            <option value="suite-familiale">Suite Familiale — 540 €/nuit</option>
+            <option value="suite-royale">Suite Royale Étoilée — 750 €/nuit</option>
+          </select>
+        </div>
+
+        <div class="grid grid-3">
+          <div class="form-group">
+            <label for="checkin">Arrivée</label>
+            <input type="date" id="checkin" name="checkin" required>
+          </div>
+          <div class="form-group">
+            <label for="checkout">Départ</label>
+            <input type="date" id="checkout" name="checkout" required>
+          </div>
+          <div class="form-group">
+            <label for="guests">Voyageurs</label>
+            <input type="number" id="guests" name="guests" min="1" max="6" value="2" required>
+          </div>
+        </div>
+
+        <h2 class="step-title">2. Options</h2>
+        <label class="form-check">
+          <input type="checkbox" id="opt-minibar" name="opt-minibar">
+          <span>Minibar Premium — <span class="price-hint">+25 €/nuit</span></span>
+        </label>
+        <label class="form-check">
+          <input type="checkbox" id="opt-spa" name="opt-spa">
+          <span>Accès Spa &amp; Soin Massage — <span class="price-hint">+90 €/personne</span></span>
+        </label>
+
+        <h2 class="step-title">3. Vos coordonnées</h2>
+        <div class="grid grid-2">
+          <div class="form-group">
+            <label for="res-name">Nom complet</label>
+            <input type="text" id="res-name" name="res-name" required>
+          </div>
+          <div class="form-group">
+            <label for="res-email">Adresse email</label>
+            <input type="email" id="res-email" name="res-email" required>
+          </div>
+        </div>
+
+        <div id="price-summary" class="price-summary" aria-live="polite">
+          Sélectionnez une chambre et des dates valides pour voir le tarif estimé.
+        </div>
+
+        <div id="reservation-error" class="form-error" role="alert"></div>
+
+        <div class="mt-lg">
+          <button type="submit" class="btn-primary">Procéder au paiement sécurisé</button>
+          <p class="form-note">Vous serez redirigé vers la page de paiement sécurisée Stripe. Le Jardin Étoilé ne collecte ni ne stocke jamais vos coordonnées bancaires.</p>
+        </div>
+      </form>
+    </main>
+
+    <footer class="footer">
+      <small>© 2026 Le Jardin Étoilé.</small>
+    </footer>
+  </div>
+  <script src="scripts.js" defer></script>
+</body>
+</html>

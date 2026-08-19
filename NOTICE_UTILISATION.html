@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guide d'utilisation - Template Web Premium</title>
+  <style>
+    /* Style épuré et ultra lisible */
+    :root {
+      --primary: #2563eb;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --accent-bg: #eff6ff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      font-size: 18px; /* Grande taille pour une lisibilité maximale */
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    header {
+      background-color: var(--card-bg);
+      padding: 2.5rem 2rem;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 2.2rem;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+    }
+
+    .badge {
+      display: inline-block;
+      background-color: #dbeafe;
+      color: #1e40af;
+      font-weight: 600;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+
+    section {
+      background-color: var(--card-bg);
+      padding: 2rem;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      margin-bottom: 2rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      color: #0f172a;
+    }
+
+    p {
+      margin-bottom: 1rem;
+    }
+
+    ul, ol {
+      margin-left: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    li {
+      margin-bottom: 0.6rem;
+    }
+
+    .step-card {
+      background-color: var(--accent-bg);
+      border-left: 4px solid var(--primary);
+      padding: 1.2rem;
+      border-radius: 8px;
+      margin: 1rem 0;
+    }
+
+    .step-card h3 {
+      font-size: 1.2rem;
+      margin-bottom: 0.4rem;
+      color: var(--primary);
+    }
+
+    .file-list {
+      background-color: #f1f5f9;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 0.95rem;
+      line-height: 1.8;
+      margin: 1rem 0;
+    }
+
+    code {
+      background-color: #e2e8f0;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 0.95rem;
+    }
+
+    .footer {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-top: 3rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- EN-TÊTE -->
+    <header>
+      <span class="badge">Guide de prise en main</span>
+      <h1>Notice d'utilisation de votre site</h1>
+      <p>Découvrez comment modifier vos textes, vos photos et mettre votre site en ligne en quelques minutes.</p>
+    </header>
+
+    <!-- SECTION 1 : CONTENU DU DOSSIER -->
+    <section>
+      <h2>📁 1. Que contient votre dossier ?</h2>
+      <p>Tous les fichiers de votre site sont réunis ici. Voici à quoi sert chaque fichier :</p>
+      
+      <div class="file-list">
+        ├── index.html ➜ Page d'accueil<br>
+        ├── menu.html ➜ Carte / Services<br>
+        ├── reservation.html ➜ Tarifs et réservations<br>
+        ├── gallery.html ➜ Galerie photos<br>
+        ├── histoire.html ➜ Présentation de l'établissement<br>
+        ├── contact.html ➜ Formulaire et coordonnées<br>
+        ├── texte.html ➜ Page générique (Mentions légales / CGV)<br>
+        ├── success.html ➜ Page affichée après un paiement réussi<br>
+        ├── styles.css ➜ Mise en page et couleurs du site<br>
+        ├── scripts.js ➜ Fonctions interactives (calculateur, paiement)<br>
+        └── api/ ➜ Fonctions serveur (paiement Stripe, emails)
+      </div>
+    </section>
+
+    <!-- SECTION 2 : MODIFIER LE SITE -->
+    <section>
+      <h2>✏️ 2. Comment modifier vos textes et images ?</h2>
+      <p>Aucune compétence technique avancée n'est requise. Deux méthodes s'offrent à vous :</p>
+
+      <div class="step-card">
+        <h3>Méthode 1 : Modification simple dans les fichiers</h3>
+        <ol>
+          <li>Faites un clic droit sur n'importe quel fichier <code>.html</code> (ex: <code>index.html</code>).</li>
+          <li>Choisissez <strong>Ouvrir avec</strong> ➜ <strong>Bloc-notes</strong> (ou VS Code).</li>
+          <li>Remplacez simplement les phrases écrites entre les balises par les vôtres.</li>
+          <li>Enregistrez le fichier (Touches <code>Ctrl + S</code>).</li>
+        </ol>
+      </div>
+
+      <div class="step-card">
+        <h3>Méthode 2 : Remplacer les photos</h3>
+        <p>Pour remplacer une image, mettez vos nouvelles photos dans un dossier nommé <code>images</code> et remplacez les liens dans les fichiers HTML, ou réutilisez simplement le même nom de fichier photo.</p>
+      </div>
+    </section>
+
+    <!-- SECTION 3 : MISE EN LIGNE -->
+    <section>
+      <h2>🚀 3. Comment mettre votre site sur Internet ?</h2>
+      
+      <div class="step-card">
+        <h3>Option A : Hébergement gratuit (Vercel ou Netlify) — Recommandé</h3>
+        <ol>
+          <li>Rendez-vous sur <strong>Vercel.com</strong> ou <strong>Netlify.com</strong> et créez un compte gratuit.</li>
+          <li>Glissez-déposez simplement tout votre dossier sur leur site.</li>
+          <li>Votre site sera immédiatement en ligne avec une adresse web sécurisée (HTTPS) !</li>
+        </ol>
+      </div>
+
+      <div class="step-card">
+        <h3>Option B : Hébergeur traditionnel (Hostinger, OVH, LWS...)</h3>
+        <p>Connectez-vous au gestionnaire de fichiers de votre hébergeur et envoyez l'intégralité du contenu du dossier dans votre répertoire <code>public_html</code> ou <code>www</code>.</p>
+      </div>
+    </section>
+
+    <!-- SECTION 4 : PAIEMENT EN LIGNE -->
+    <section>
+      <h2>💳 4. Configurer le paiement en ligne (Stripe)</h2>
+      <p>Le module de réservation redirige vos clients vers <strong>Stripe Checkout</strong>, qui collecte lui-même le numéro de carte sur sa propre page sécurisée : ce site ne manipule et ne stocke jamais de coordonnées bancaires.</p>
+
+      <div class="step-card">
+        <h3>Étape 1 : Créer votre compte Stripe</h3>
+        <p>Rendez-vous sur <strong>stripe.com</strong>, créez un compte, puis récupérez votre clé secrète dans le menu <em>Développeurs &gt; Clés API</em>.</p>
+      </div>
+
+      <div class="step-card">
+        <h3>Étape 2 : Ajouter les variables d'environnement</h3>
+        <p>Sur votre hébergeur (Vercel ou Netlify), dans les réglages du projet, ajoutez :</p>
+        <ul>
+          <li><code>STRIPE_SECRET_KEY</code> — votre clé secrète Stripe</li>
+          <li><code>STRIPE_WEBHOOK_SECRET</code> — voir étape 3 ci-dessous</li>
+          <li><code>RESEND_API_KEY</code> — pour l'email de confirmation automatique (compte gratuit sur resend.com)</li>
+        </ul>
+      </div>
+
+      <div class="step-card">
+        <h3>Étape 3 : Créer le webhook Stripe</h3>
+        <p>Dans le tableau de bord Stripe, créez un webhook pointant vers <code>https://votre-domaine.com/api/webhook</code>, en sélectionnant l'événement <code>checkout.session.completed</code>. Copiez la clé de signature générée dans <code>STRIPE_WEBHOOK_SECRET</code>.</p>
+      </div>
+
+      <div class="step-card">
+        <h3>Étape 4 : Modifier les tarifs</h3>
+        <p>Les prix des chambres et des options se modifient dans <code>api/create-checkout-session.js</code> (objet <code>ROOM_CATALOG</code>). Reportez tout changement de prix dans <code>scripts.js</code> (objet <code>ROOMS</code>) pour que le tarif affiché au client avant paiement reste exact.</p>
+      </div>
+
+      <p>Tant que ces variables ne sont pas configurées, le bouton de réservation ne pourra pas créer de session de paiement.</p>
+    </section>
+
+    <!-- PIED DE PAGE -->
+    <div class="footer">
+      <p>Besoin d'assistance ? Contactez-nous directement via la messagerie de la plateforme où vous avez acheté le template.</p>
+      <p style="margin-top: 0.5rem; font-weight: 600;">Merci pour votre achat !</p>
+    </div>
+  </div>
+
+</body>
+</html>

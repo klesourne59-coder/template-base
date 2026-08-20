@@ -2,9 +2,9 @@ let currentConfig = {};
 const iframe = document.getElementById('preview-frame');
 
 // 1. Initialisation des données depuis site-config.json
-fetch('../site-config.json')
+fetch('site-config.json')
   .then((res) => {
-    if (!res.ok) throw new Error('Erreur de chargement');
+    if (!res.ok) throw new Error('Erreur de chargement de site-config.json');
     return res.json();
   })
   .then((defaultConfig) => {
@@ -15,7 +15,7 @@ fetch('../site-config.json')
   })
   .catch((err) => console.error('Erreur Customizer Init :', err));
 
-// 2. Synchronisation instantanée avec le vrai site (iframe)
+// 2. Synchronisation instantanée avec l'iframe
 function syncPreview() {
   if (iframe && iframe.contentWindow) {
     iframe.contentWindow.postMessage(
@@ -170,7 +170,7 @@ function renderRestaurantManager() {
       <div class="crud-body">
         <div id="items-cat-${catIndex}" class="crud-list">
           ${(cat.items || []).map((item, itemIndex) => `
-            <div class="crud-card" style="background: #f8fafc; border-style: dashed; margin-top: 8px;">
+            <div class="crud-card" style="background: #020617; border-style: dashed; margin-top: 8px;">
               <div class="crud-header">
                 <strong>${item.name || 'Nouveau plat'}</strong>
                 <button onclick="removeRestaurantItem(${catIndex}, ${itemIndex})" class="btn-danger" style="padding: 4px 8px; font-size: 0.75rem;">Supprimer plat</button>
@@ -387,7 +387,7 @@ async function exportSiteZip() {
 
   for (const file of filesToInclude) {
     try {
-      const response = await fetch(`../${file}`);
+      const response = await fetch(file);
       if (response.ok) {
         const content = await response.text();
         zip.file(file, content);
@@ -413,4 +413,6 @@ function bindFormControls(cfg) {
   });
 }
 
-iframe.onload = () => syncPreview();
+if (iframe) {
+  iframe.onload = () => syncPreview();
+}

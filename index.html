@@ -3,92 +3,50 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mon Site Web</title>
-
-    <style id="theme-styles">
-      :root {
-        --font-heading: "Playfair Display", serif;
-        --font-body: "Montserrat", sans-serif;
-        --font-menu: "Poppins", sans-serif;
-        --color-bg: #081012;
-        --color-text: #ffffff;
-      }
-
-      body {
-        background-color: var(--color-bg) !important;
-        color: var(--color-text) !important;
-        font-family: var(--font-body) !important;
-        margin: 0;
-        padding: 0;
-      }
-
-      h1,
-      h2,
-      h3 {
-        font-family: var(--font-heading) !important;
-      }
-      nav,
-      .nav-link {
-        font-family: var(--font-menu) !important;
-      }
-
-      nav {
-        display: flex;
-        gap: 20px;
-        padding: 20px;
-        background: rgba(255, 255, 255, 0.05);
-      }
-
-      nav a {
-        color: #c9a16f;
-        text-decoration: none;
-        font-weight: 600;
-      }
-
-      .hero {
-        padding: 60px 20px;
-        text-align: center;
-      }
-
-      /* Styles par défaut des boutons du site */
-      .btn {
-        display: inline-block;
-        background-color: #c9a16f;
-        color: #000000;
-        padding: 12px 24px;
-        border-radius: 6px;
-        text-decoration: none;
-        font-weight: bold;
-        border: none;
-        cursor: pointer;
-        margin-top: 15px;
-      }
-    </style>
+    <title data-config="hero.title">Mon Établissement</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="config-loader.js" defer></script>
   </head>
   <body>
-    <!-- Menu navigation (Permet de changer de page grâce au mode "Naviguer") -->
-    <nav>
-      <a href="index.html" class="nav-link">Accueil</a>
-      <a href="services.html" class="nav-link">Nos Services</a>
-      <a href="contact.html" class="nav-link">Contact</a>
-    </nav>
+    <!-- EN-TÊTE / HERO -->
+    <header class="hero">
+      <h1 data-config="hero.title">Nom de l'établissement</h1>
+      <p data-config="hero.subtitle">Description de votre établissement</p>
+    </header>
 
-    <main class="hero">
-      <h1>Titre principal du site</h1>
-      <p>Texte de présentation modifiable au clavier.</p>
+    <main>
+      <!-- SECTION CHAMBRES -->
+      <section id="rooms-section" class="section-container">
+        <h2>Nos Chambres</h2>
+        <div id="rooms-list" class="rooms-grid">
+          <!-- Contenu injecté dynamiquement par config-loader.js -->
+        </div>
+      </section>
 
-      <!-- Bouton personnalisable en direct (couleur, taille, arrondi, texte) -->
-      <a href="contact.html" class="btn">Réserver maintenant</a>
+      <!-- SECTION RESTAURANT -->
+      <section id="restaurant-section" class="section-container">
+        <h2>Notre Carte Restaurant</h2>
+        <div id="restaurant-menu" class="restaurant-container">
+          <!-- Contenu injecté dynamiquement par config-loader.js -->
+        </div>
+      </section>
 
-      <div style="margin-top: 30px;">
-        <img
-          src="https://via.placeholder.com/600x300"
-          alt="Image"
-          id="hero-img"
-        />
-      </div>
+      <!-- SECTION SERVICES -->
+      <section id="services-section" class="section-container">
+        <h2>Nos Services</h2>
+        <div id="services-list" class="services-grid">
+          <!-- Contenu injecté dynamiquement par config-loader.js -->
+        </div>
+      </section>
     </main>
 
-    <script src="editor-inline.js"></script>
+    <!-- PIED DE PAGE -->
+    <footer>
+      <p>
+        Téléphone :
+        <a href="tel:" data-config="contact.phone">01 02 03 04 05</a> | Email :
+        <a href="mailto:" data-config="contact.email">contact@hotel.com</a>
+      </p>
+    </footer>
   </body>
 </html>

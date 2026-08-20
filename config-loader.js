@@ -1,160 +1,141 @@
-window.SiteConfigEngine = {
-  config: {},
+// Global config state
+let currentConfig = {};
 
-  init() {
-    const savedConfig = localStorage.getItem('site_config_draft');
-    if (savedConfig) {
-      try {
-        this.config = JSON.parse(savedConfig);
-        this.applyConfig(this.config);
-      } catch (e) {
-        this.loadDefaultConfig();
-      }
-    } else {
-      this.loadDefaultConfig();
-    }
+// 1. Initialisation : Chargement du fichier de configuration ou du brouillon local
+document.addEventListener('DOMContentLoaded', () => {
+  fetch('site-config.json')
+    .then((res) => {
+      if (!res.ok) throw new Error('Erreur de chargement du fichier site-config.json');
+      return res.json();
+    })
+    .then((defaultConfig) => {
+      const saved = localStorage.getItem('site_config_draft');
+      currentConfig = saved ? JSON.parse(saved) : defaultConfig;
+      applyConfig(currentConfig);
+    })
+    .catch((err) => console.error('Config Loader Error:', err));
+});
 
-    // Écoute les mises à jour en direct envoyées par le Customizer via iframe postMessage
-    window.addEventListener('message', (event) => {
-      if (event.data && event.data.type === 'UPDATE_CONFIG') {
-        this.config = event.data.config;
-        this.applyConfig(this.config);
-      }
-    });
-  },
-
-  loadDefaultConfig() {
-    fetch('site-config.json')
-      .then((res) => {
-        if (!res.ok) throw new Error('Impossible de charger site-config.json');
-        return res.json();
-      })
-      .then((data) => {
-        this.config = data;
-        this.applyConfig(data);
-      })
-      .catch((err) => console.error('Erreur SiteConfigEngine :', err));
-  },
-
-  applyConfig(cfg) {
-    if (!cfg) return;
-    const root = document.documentElement;
-
-    // 1. Application des Couleurs
-    if (cfg.theme) {
-      if (cfg.theme.primary) root.style.setProperty('--color-primary', cfg.theme.primary);
-      if (cfg.theme.secondary) root.style.setProperty('--color-secondary', cfg.theme.secondary);
-      if (cfg.theme.accent) root.style.setProperty('--color-accent', cfg.theme.accent);
-      if (cfg.theme.background) root.style.setProperty('--color-background', cfg.theme.background);
-      if (cfg.theme.card) root.style.setProperty('--color-card', cfg.theme.card);
-      if (cfg.theme.text) root.style.setProperty('--color-text', cfg.theme.text);
-      if (cfg.theme.border) root.style.setProperty('--color-border', cfg.theme.border);
-      if (cfg.theme.button) root.style.setProperty('--color-button', cfg.theme.button);
-      if (cfg.theme.buttonText) root.style.setProperty('--color-button-text', cfg.theme.buttonText);
-      if (cfg.theme.borderRadius !== undefined) root.style.setProperty('--radius', cfg.theme.borderRadius + 'px');
-      if (cfg.theme.shadow) root.style.setProperty('--shadow', cfg.theme.shadow);
-    }
-
-    // 2. Application de la Typographie
-    if (cfg.typography) {
-      if (cfg.typography.headingFont) root.style.setProperty('--font-heading', cfg.typography.headingFont);
-      if (cfg.typography.bodyFont) root.style.setProperty('--font-body', cfg.typography.bodyFont);
-    }
-
-    // 3. Liaison automatique des textes et images avec [data-config]
-    document.querySelectorAll('[data-config]').forEach((el) => {
-      const keyPath = el.getAttribute('data-config').split('.');
-      let val = cfg;
-      keyPath.forEach((k) => {
-        val = val ? val[k] : null;
-      });
-
-      if (val !== undefined && val !== null) {
-        if (el.tagName === 'IMG') {
-          el.src = val;
-        } else if (el.tagName === 'A' && el.getAttribute('data-config-attr') === 'href') {
-          el.href = val;
-        } else {
-          el.innerText = val;
-        }
-      }
-    });
-
-    // 4. Rendu dynamique des structures répétitives (Chambres, Restaurant, Services)
-    this.renderRoomsUI(cfg.rooms);
-    this.renderRestaurantUI(cfg.restaurant);
-    this.renderServicesUI(cfg.services);
-
-    // 5. Notification globale pour les scripts tiers (Réservation / Stripe)
-    window.dispatchEvent(new CustomEvent('siteConfigUpdated', { detail: cfg }));
-  },
-
-  renderRoomsUI(rooms) {
-    const container = document.getElementById('rooms-list-container');
-    if (!container || !Array.isArray(rooms)) return;
-
-    container.innerHTML = rooms.map(room => `
-      <div class="room-card" data-room-id="${room.id}">
-        <div class="room-image-wrapper">
-          <img src="${(room.images && room.images[0]) ? room.images[0] : 'placeholder-room.jpg'}" alt="${room.name}" class="room-img">
-        </div>
-        <div class="room-details">
-          <h3>${room.name}</h3>
-          <p class="room-desc">${room.description}</p>
-          <div class="room-meta">
-            <span>📐 ${room.surface} m²</span>
-            <span>👥 ${room.capacity} pers.</span>
-          </div>
-          <ul class="room-amenities">
-            ${(room.amenities || []).map(a => `<li>✓ ${a}</li>`).join('')}
-          </ul>
-          <div class="room-footer">
-            <span class="room-price"><strong>${room.pricePerNight} €</strong> / nuit</span>
-            <button class="btn-primary select-room-btn" onclick="selectRoomForBooking('${room.id}', ${room.pricePerNight})">Choisir</button>
-          </div>
-        </div>
-      </div>
-    `).join('');
-  },
-
-  renderRestaurantUI(menu) {
-    const container = document.getElementById('restaurant-menu-container');
-    if (!container || !Array.isArray(menu)) return;
-
-    container.innerHTML = menu.map(cat => `
-      <div class="menu-category">
-        <h2>${cat.category}</h2>
-        <div class="menu-items-grid">
-          ${(cat.items || []).map(item => `
-            <div class="menu-item-card">
-              ${item.image ? `<img src="${item.image}" alt="${item.name}">` : ''}
-              <div class="menu-item-info">
-                <div class="menu-item-header">
-                  <h4>${item.name}</h4>
-                  <span class="price">${item.price} €</span>
-                </div>
-                <p>${item.description}</p>
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-    `).join('');
-  },
-
-  renderServicesUI(services) {
-    const container = document.getElementById('services-list-container');
-    if (!container || !Array.isArray(services)) return;
-
-    container.innerHTML = services.map(serv => `
-      <div class="service-card">
-        ${serv.image ? `<img src="${serv.image}" alt="${serv.name}">` : ''}
-        <h3>${serv.name}</h3>
-        <p>${serv.description}</p>
-        <span class="service-price">${serv.price} €</span>
-      </div>
-    `).join('');
+// 2. Écoute des mises à jour en temps réel (Customizer iframe)
+window.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'UPDATE_CONFIG') {
+    currentConfig = event.data.config;
+    applyConfig(currentConfig);
   }
-};
+});
 
-document.addEventListener('DOMContentLoaded', () => window.SiteConfigEngine.init());
+// 3. Application globale de la configuration au DOM
+function applyConfig(config) {
+  if (!config) return;
+
+  // Binding des champs simples (data-config="hero.title", etc.)
+  document.querySelectorAll('[data-config]').forEach((el) => {
+    const path = el.getAttribute('data-config').split('.');
+    let val = config;
+    path.forEach((key) => {
+      val = val ? val[key] : undefined;
+    });
+
+    if (val !== undefined && val !== null) {
+      if (el.tagName === 'IMG') {
+        el.src = val;
+      } else if (el.tagName === 'A' && el.getAttribute('href')?.startsWith('tel:')) {
+        el.href = `tel:${val}`;
+        el.textContent = val;
+      } else if (el.tagName === 'A' && el.getAttribute('href')?.startsWith('mailto:')) {
+        el.href = `mailto:${val}`;
+        el.textContent = val;
+      } else {
+        el.textContent = val;
+      }
+    }
+  });
+
+  // Rendu des listes dynamiques
+  renderRooms(config.rooms);
+  renderRestaurant(config.restaurant);
+  renderServices(config.services);
+}
+
+// 4. Rendu dynamique des Chambres
+function renderRooms(rooms) {
+  const container = document.getElementById('rooms-list');
+  if (!container || !Array.isArray(rooms)) return;
+
+  container.innerHTML = rooms
+    .map(
+      (room) => `
+    <article class="room-card">
+      ${room.images && room.images[0] ? `<img src="${room.images[0]}" alt="${room.name || ''}" class="room-image">` : ''}
+      <div class="room-details">
+        <h3>${room.name || 'Chambre'}</h3>
+        <p class="room-description">${room.description || ''}</p>
+        <ul class="room-specs">
+          ${room.capacity ? `<li><strong>Capacité :</strong> ${room.capacity} pers.</li>` : ''}
+          ${room.surface ? `<li><strong>Surface :</strong> ${room.surface} m²</li>` : ''}
+        </ul>
+        <div class="room-footer">
+          <span class="room-price">${room.pricePerNight ? `${room.pricePerNight} € / nuit` : ''}</span>
+          <a href="reservation.html?room=${encodeURIComponent(room.id || room.name)}" class="btn-book">Réserver</a>
+        </div>
+      </div>
+    </article>
+  `
+    )
+    .join('');
+}
+
+// 5. Rendu dynamique du Menu Restaurant (Catégories + Plats)
+function renderRestaurant(restaurantData) {
+  const container = document.getElementById('restaurant-menu');
+  if (!container || !Array.isArray(restaurantData)) return;
+
+  container.innerHTML = restaurantData
+    .map(
+      (cat) => `
+    <div class="menu-category">
+      <h3 class="category-title">${cat.category || 'Catégorie'}</h3>
+      <div class="menu-items-grid">
+        ${(cat.items || [])
+          .map(
+            (item) => `
+          <div class="menu-item">
+            ${item.image ? `<img src="${item.image}" alt="${item.name || ''}" class="menu-item-img">` : ''}
+            <div class="menu-item-content">
+              <div class="menu-item-header">
+                <span class="item-name">${item.name || ''}</span>
+                <span class="item-price">${item.price ? `${item.price} €` : ''}</span>
+              </div>
+              <p class="item-description">${item.description || ''}</p>
+            </div>
+          </div>
+        `
+          )
+          .join('')}
+      </div>
+    </div>
+  `
+    )
+    .join('');
+}
+
+// 6. Rendu dynamique des Services (Spa, Activités, etc.)
+function renderServices(services) {
+  const container = document.getElementById('services-list');
+  if (!container || !Array.isArray(services)) return;
+
+  container.innerHTML = services
+    .map(
+      (service) => `
+    <div class="service-card">
+      ${service.image ? `<img src="${service.image}" alt="${service.name || ''}" class="service-image">` : ''}
+      <div class="service-info">
+        <h3>${service.name || 'Service'}</h3>
+        <p>${service.description || ''}</p>
+        ${service.price ? `<span class="service-price">${service.price} €</span>` : ''}
+      </div>
+    </div>
+  `
+    )
+    .join('');
+}

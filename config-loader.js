@@ -1,64 +1,62 @@
-(async function loadConfig() {
-  let config = null;
+window.SiteConfigEngine = {
+  config: {},
 
-  // 1. Vérifie si une configuration existe dans le LocalStorage (mode local/demo)
-  const savedConfig = localStorage.getItem('site_config');
-  if (savedConfig) {
-    try {
-      config = JSON.parse(savedConfig);
-    } catch (e) {
-      console.error("Erreur de lecture du localStorage", e);
+  init() {
+    const savedConfig = localStorage.getItem('site_config_draft');
+    if (savedConfig) {
+      this.config = JSON.parse(savedConfig);
+      this.applyConfig(this.config);
+    } else {
+      fetch('config.json')
+        .then((res) => res.json())
+        .then((data) => {
+          this.config = data;
+          this.applyConfig(data);
+        })
+        .catch((err) => console.error('Erreur chargement config.json :', err));
     }
-  }
 
-  // 2. Sinon, charge le fichier JSON du serveur
-  if (!config) {
-    try {
-      const response = await fetch('site-config.json');
-      if (response.ok) {
-        config = await response.json();
+    window.addEventListener('message', (event) => {
+      if (event.data && event.data.type === 'UPDATE_CONFIG') {
+        this.config = event.data.config;
+        this.applyConfig(this.config);
       }
-    } catch (err) {
-      console.warn("Impossible de charger site-config.json", err);
-    }
-  }
+    });
+  },
 
-  // 3. Application de la configuration
-  if (config) {
-    applyConfig(config);
-  }
+  applyConfig(cfg) {
+    const root = document.documentElement;
 
-  // Écoute des mises à jour en direct depuis le Customizer
-  window.addEventListener('message', (event) => {
-    if (event.data && event.data.type === 'UPDATE_CONFIG') {
-      applyConfig(event.data.config);
-    }
-  });
-
-  function applyConfig(cfg) {
-    if (!cfg) return;
-
-    // Couleurs
-    if (cfg.theme && cfg.theme.colors) {
-      const root = document.documentElement;
-      if (cfg.theme.colors.secondary) root.style.setProperty('--color-secondary', cfg.theme.colors.secondary);
-      if (cfg.theme.colors.background) root.style.setProperty('--color-background', cfg.theme.colors.background);
-      if (cfg.theme.colors.card) root.style.setProperty('--color-card', cfg.theme.colors.card);
+    if (cfg.theme) {
+      if (cfg.theme.primary) root.style.setProperty('--color-primary', cfg.theme.primary);
+      if (cfg.theme.secondary) root.style.setProperty('--color-secondary', cfg.theme.secondary);
+      if (cfg.theme.bg) root.style.setProperty('--color-bg', cfg.theme.bg);
+      if (cfg.theme.text) root.style.setProperty('--color-text', cfg.theme.text);
+      if (cfg.theme.btnBg) root.style.setProperty('--btn-bg', cfg.theme.btnBg);
+      if (cfg.theme.btnText) root.style.setProperty('--btn-text', cfg.theme.btnText);
+      if (cfg.theme.btnRadius !== undefined) root.style.setProperty('--btn-radius', cfg.theme.btnRadius + 'px');
+      if (cfg.theme.fontHeading) root.style.setProperty('--font-heading', cfg.theme.fontHeading);
+      if (cfg.theme.fontBody) root.style.setProperty('--font-body', cfg.theme.fontBody);
     }
 
-    // Nom de la marque
-    if (cfg.identity && cfg.identity.name) {
-      document.querySelectorAll('.brand-name').forEach(el => el.textContent = cfg.identity.name);
-    }
+    document.querySelectorAll('[data-config]').forEach((el) => {
+      const keyPath = el.getAttribute('data-config').split('.');
+      let val = cfg;
+      keyPath.forEach((k) => {
+        val = val ? val[k] : null;
+      });
 
-    // Image Hero
-    if (cfg.images && cfg.images.heroBackground) {
-      const hero = document.querySelector('.hero');
-      if (hero) {
-        hero.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)), url('${cfg.images.heroBackground}')`;
-        hero.style.backgroundSize = 'cover';
-        hero.style.backgroundPosition = 'center';
+      if (val !== undefined && val !== null) {
+        if (el.tagName === 'IMG') {
+          el.src = val;
+        } else {
+          el.innerText = val;
+        }
       }
-    }
+    });
+
+    window.dispatchEvent(new CustomEvent('siteConfigUpdated', { detail: cfg }));
   }
-})();
+};
+
+document.addEventListener('DOMContentLoaded', () => window.SiteConfigEngine.init());

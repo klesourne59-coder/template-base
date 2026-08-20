@@ -40,7 +40,7 @@ function updateField(input) {
   syncPreview();
 }
 
-// 4. Gestion visuelle des images (Convertit en Base64 pour aperçu immédiat)
+// 4. Gestion visuelle des images (Base64)
 function handleImageUpload(fileInput, configPath, previewElemId) {
   const file = fileInput.files[0];
   if (!file) return;
@@ -66,7 +66,7 @@ function handleImageUpload(fileInput, configPath, previewElemId) {
   reader.readAsDataURL(file);
 }
 
-// 5. Gestionnaire de Chambres (CRUD Visuel)
+// 5. GESTIONNAIRE DES CHAMBRES (CRUD)
 function renderRoomsManager() {
   const container = document.getElementById('rooms-manager-container');
   if (!container) return;
@@ -80,7 +80,7 @@ function renderRoomsManager() {
     card.innerHTML = `
       <div class="crud-header">
         <strong>${room.name || 'Nouvelle Chambre'}</strong>
-        <button onclick="removeRoom(${index})" class="btn-danger">🗑️ Supprimer</button>
+        <button onclick="removeRoom(${index})" class="btn-danger">Supprimer</button>
       </div>
       <div class="crud-body">
         <label>Nom de la chambre</label>
@@ -151,11 +151,207 @@ function uploadRoomImage(fileInput, index) {
   reader.readAsDataURL(file);
 }
 
-function renderAllManagers() {
-  renderRoomsManager();
+// 6. GESTIONNAIRE DU RESTAURANT (CRUD)
+function renderRestaurantManager() {
+  const container = document.getElementById('restaurant-manager-container');
+  if (!container) return;
+
+  container.innerHTML = '';
+  if (!currentConfig.restaurant) currentConfig.restaurant = [];
+
+  currentConfig.restaurant.forEach((cat, catIndex) => {
+    const catCard = document.createElement('div');
+    catCard.className = 'crud-card';
+    catCard.innerHTML = `
+      <div class="crud-header">
+        <input type="text" value="${cat.category || ''}" placeholder="Nom de la catégorie (ex: Entrées)" oninput="currentConfig.restaurant[${catIndex}].category = this.value; syncPreview();" style="font-weight: bold; font-size: 1rem;">
+        <button onclick="removeRestaurantCategory(${catIndex})" class="btn-danger">Supprimer catégorie</button>
+      </div>
+      <div class="crud-body">
+        <div id="items-cat-${catIndex}" class="crud-list">
+          ${(cat.items || []).map((item, itemIndex) => `
+            <div class="crud-card" style="background: #f8fafc; border-style: dashed; margin-top: 8px;">
+              <div class="crud-header">
+                <strong>${item.name || 'Nouveau plat'}</strong>
+                <button onclick="removeRestaurantItem(${catIndex}, ${itemIndex})" class="btn-danger" style="padding: 4px 8px; font-size: 0.75rem;">Supprimer plat</button>
+              </div>
+              <div class="crud-body">
+                <label>Nom du plat</label>
+                <input type="text" value="${item.name || ''}" oninput="currentConfig.restaurant[${catIndex}].items[${itemIndex}].name = this.value; syncPreview();">
+
+                <div class="row-2">
+                  <div>
+                    <label>Prix (€)</label>
+                    <input type="number" value="${item.price || 0}" oninput="currentConfig.restaurant[${catIndex}].items[${itemIndex}].price = Number(this.value); syncPreview();">
+                  </div>
+                  <div>
+                    <label>Photo du plat</label>
+                    <div class="image-uploader-inline">
+                      <img src="${item.image || ''}" id="rest-img-preview-${catIndex}-${itemIndex}" class="thumb-preview mini">
+                      <input type="file" accept="image/*" onchange="uploadRestaurantImage(this, ${catIndex}, ${itemIndex})">
+                    </div>
+                  </div>
+                </div>
+
+                <label>Description</label>
+                <textarea rows="2" oninput="currentConfig.restaurant[${catIndex}].items[${itemIndex}].description = this.value; syncPreview();">${item.description || ''}</textarea>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        <button onclick="addRestaurantItem(${catIndex})" class="btn-secondary" style="width: 100%; margin-top: 10px;">+ Ajouter un plat à ${cat.category || 'cette catégorie'}</button>
+      </div>
+    `;
+    container.appendChild(catCard);
+  });
+
+  const addCatBtn = document.createElement('button');
+  addCatBtn.className = 'btn-primary';
+  addCatBtn.style.marginTop = '12px';
+  addCatBtn.innerText = '+ Ajouter une catégorie de menu';
+  addCatBtn.onclick = addRestaurantCategory;
+  container.appendChild(addCatBtn);
 }
 
-// 6. Sauvegarde & Réinitialisation
+function addRestaurantCategory() {
+  if (!currentConfig.restaurant) currentConfig.restaurant = [];
+  currentConfig.restaurant.push({
+    category: 'Nouvelle Catégorie',
+    items: []
+  });
+  renderRestaurantManager();
+  syncPreview();
+}
+
+function removeRestaurantCategory(catIndex) {
+  currentConfig.restaurant.splice(catIndex, 1);
+  renderRestaurantManager();
+  syncPreview();
+}
+
+function addRestaurantItem(catIndex) {
+  if (!currentConfig.restaurant[catIndex].items) currentConfig.restaurant[catIndex].items = [];
+  currentConfig.restaurant[catIndex].items.push({
+    id: 'rest-' + Date.now(),
+    name: 'Nouveau plat',
+    description: '',
+    price: 18,
+    image: ''
+  });
+  renderRestaurantManager();
+  syncPreview();
+}
+
+function removeRestaurantItem(catIndex, itemIndex) {
+  currentConfig.restaurant[catIndex].items.splice(itemIndex, 1);
+  renderRestaurantManager();
+  syncPreview();
+}
+
+function uploadRestaurantImage(fileInput, catIndex, itemIndex) {
+  const file = fileInput.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    currentConfig.restaurant[catIndex].items[itemIndex].image = e.target.result;
+    const preview = document.getElementById(`rest-img-preview-${catIndex}-${itemIndex}`);
+    if (preview) preview.src = e.target.result;
+    syncPreview();
+  };
+  reader.readAsDataURL(file);
+}
+
+// 7. GESTIONNAIRE DES SERVICES (CRUD)
+function renderServicesManager() {
+  const container = document.getElementById('services-manager-container');
+  if (!container) return;
+
+  container.innerHTML = '';
+  if (!currentConfig.services) currentConfig.services = [];
+
+  currentConfig.services.forEach((serv, index) => {
+    const card = document.createElement('div');
+    card.className = 'crud-card';
+    card.innerHTML = `
+      <div class="crud-header">
+        <strong>${serv.name || 'Nouveau Service'}</strong>
+        <button onclick="removeService(${index})" class="btn-danger">Supprimer</button>
+      </div>
+      <div class="crud-body">
+        <label>Nom du service</label>
+        <input type="text" value="${serv.name || ''}" oninput="currentConfig.services[${index}].name = this.value; syncPreview();">
+
+        <div class="row-2">
+          <div>
+            <label>Prix (€)</label>
+            <input type="number" value="${serv.price || 0}" oninput="currentConfig.services[${index}].price = Number(this.value); syncPreview();">
+          </div>
+          <div>
+            <label>Photo</label>
+            <div class="image-uploader-inline">
+              <img src="${serv.image || ''}" id="serv-img-preview-${index}" class="thumb-preview mini">
+              <input type="file" accept="image/*" onchange="uploadServiceImage(this, ${index})">
+            </div>
+          </div>
+        </div>
+
+        <label>Description</label>
+        <textarea rows="2" oninput="currentConfig.services[${index}].description = this.value; syncPreview();">${serv.description || ''}</textarea>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+
+  const addBtn = document.createElement('button');
+  addBtn.className = 'btn-primary';
+  addBtn.style.marginTop = '12px';
+  addBtn.innerText = '+ Ajouter un service';
+  addBtn.onclick = addService;
+  container.appendChild(addBtn);
+}
+
+function addService() {
+  if (!currentConfig.services) currentConfig.services = [];
+  currentConfig.services.push({
+    id: 'serv-' + Date.now(),
+    name: 'Nouveau service',
+    description: '',
+    price: 35,
+    image: ''
+  });
+  renderServicesManager();
+  syncPreview();
+}
+
+function removeService(index) {
+  currentConfig.services.splice(index, 1);
+  renderServicesManager();
+  syncPreview();
+}
+
+function uploadServiceImage(fileInput, index) {
+  const file = fileInput.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    currentConfig.services[index].image = e.target.result;
+    const preview = document.getElementById(`serv-img-preview-${index}`);
+    if (preview) preview.src = e.target.result;
+    syncPreview();
+  };
+  reader.readAsDataURL(file);
+}
+
+// 8. EXECUTION GLOBALE DE RENDU
+function renderAllManagers() {
+  renderRoomsManager();
+  renderRestaurantManager();
+  renderServicesManager();
+}
+
+// 9. SAUVEGARDE, REINITIALISATION & EXPORT
 function saveConfig() {
   localStorage.setItem('site_config_draft', JSON.stringify(currentConfig));
   alert('Configuration enregistrée avec succès dans le navigateur !');
@@ -168,7 +364,6 @@ function resetConfig() {
   }
 }
 
-// 7. Exportation du ZIP complet prêt à l'emploi
 async function exportSiteZip() {
   if (typeof JSZip === 'undefined') {
     alert('Erreur: La bibliothèque JSZip n\'est pas disponible.');

@@ -2,155 +2,466 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <title>Constructeur de Site — Mode Visuel</title>
-
-    <!-- JSZip & FileSaver pour l'export ZIP instantané sans serveur -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Customizer — Administration du site</title>
+    <link rel="stylesheet" href="customizer.css" />
+    <!-- Librairies pour l'exportation ZIP -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-
-    <link rel="stylesheet" href="customizer.css" />
   </head>
   <body>
-    <!-- Barre Supérieure -->
-    <header class="top-bar">
+    <!-- BARRE SUPÉRIEURE D'ACTIONS ET DE PRÉVISUALISATION -->
+    <header class="customizer-header">
       <div class="brand">
-        <strong>✨ Website Builder</strong>
+        <h1>Customizer <span>Site Builder</span></h1>
       </div>
 
-      <div class="viewports">
+      <!-- Mode d'affichage de l'aperçu -->
+      <div class="device-switcher">
         <button
-          onclick="setViewport('desktop')"
-          class="active"
-          id="btn-desktop"
+          class="device-btn active"
+          data-device="desktop"
+          onclick="setPreviewDevice('desktop')"
         >
           🖥️ Desktop
         </button>
-        <button onclick="setViewport('mobile')" id="btn-mobile">
+        <button
+          class="device-btn"
+          data-device="tablet"
+          onclick="setPreviewDevice('tablet')"
+        >
+          📱 Tablette
+        </button>
+        <button
+          class="device-btn"
+          data-device="mobile"
+          onclick="setPreviewDevice('mobile')"
+        >
           📱 Mobile
         </button>
       </div>
 
-      <div class="actions">
-        <button onclick="resetConfig()" class="btn-secondary">
-          Réinitialiser
+      <!-- Actions globales -->
+      <div class="header-actions">
+        <button class="btn-secondary" onclick="resetConfig()">
+          🔄 Réinitialiser
         </button>
-        <button onclick="saveConfig()" class="btn-primary">Enregistrer</button>
-        <button onclick="exportSiteZip()" class="btn-success">
-          🚀 Exporter mon site (ZIP)
+        <button class="btn-primary" onclick="saveConfig()">
+          💾 Enregistrer
+        </button>
+        <button class="btn-success" onclick="exportSiteZip()">
+          📦 Exporter (ZIP)
         </button>
       </div>
     </header>
 
-    <div class="builder-container">
-      <!-- Barre Latérale de Contrôle -->
-      <aside class="sidebar">
-        <!-- Accordéon : Général -->
-        <details open class="menu-group">
-          <summary>🏠 Informations Générales</summary>
-          <div class="group-content">
-            <label>Nom du site</label>
-            <input
-              type="text"
-              data-binding="site.name"
-              oninput="updateField(this)"
-            />
+    <div class="customizer-layout">
+      <!-- PANNEAU DE NAVIGATION ET FORMULAIRES (GAUCHE) -->
+      <aside class="sidebar-panel">
+        <!-- Navigation par Onglets -->
+        <nav class="tabs-nav">
+          <button class="tab-btn active" data-tab="tab-site">🏠 Site</button>
+          <button class="tab-btn" data-tab="tab-appearance">
+            🎨 Apparence
+          </button>
+          <button class="tab-btn" data-tab="tab-typography">
+            🔤 Typographie
+          </button>
+          <button class="tab-btn" data-tab="tab-images">🖼️ Images</button>
+          <button class="tab-btn" data-tab="tab-rooms">🏨 Chambres</button>
+          <button class="tab-btn" data-tab="tab-restaurant">
+            🍽️ Restaurant
+          </button>
+          <button class="tab-btn" data-tab="tab-services">✨ Services</button>
+          <button class="tab-btn" data-tab="tab-settings">⚙️ Réglages</button>
+        </nav>
 
-            <label>Slogan</label>
-            <input
-              type="text"
-              data-binding="site.slogan"
-              oninput="updateField(this)"
-            />
+        <!-- CONTENU DES ONGLETS -->
+        <div class="tabs-content">
+          <!-- 1. ONGLET SITE -->
+          <section id="tab-site" class="tab-pane active">
+            <h2>Identité & Coordonnées</h2>
 
-            <label>Logo du site</label>
-            <div class="image-picker">
-              <img id="preview-logo" src="" class="thumb" />
+            <div class="form-group">
+              <label for="site-name">Nom du site</label>
               <input
-                type="file"
-                accept="image/*"
-                onchange="uploadImage(this, 'site.logo', 'preview-logo')"
+                type="text"
+                id="site-name"
+                data-binding="site.name"
+                oninput="updateField(this)"
               />
             </div>
-          </div>
-        </details>
 
-        <!-- Accordéon : Apparence -->
-        <details class="menu-group">
-          <summary>🎨 Thème & Couleurs</summary>
-          <div class="group-content">
-            <label>Couleur Principale</label>
-            <input
-              type="color"
-              data-binding="theme.primary"
-              onchange="updateField(this)"
-            />
+            <div class="form-group">
+              <label for="site-slogan">Slogan / Sous-titre</label>
+              <input
+                type="text"
+                id="site-slogan"
+                data-binding="site.slogan"
+                oninput="updateField(this)"
+              />
+            </div>
 
-            <label>Couleur d'Arrière-Plan</label>
-            <input
-              type="color"
-              data-binding="theme.bg"
-              onchange="updateField(this)"
-            />
+            <div class="form-group">
+              <label for="site-description">Description générale</label>
+              <textarea
+                id="site-description"
+                data-binding="site.description"
+                rows="3"
+                oninput="updateField(this)"
+              ></textarea>
+            </div>
 
-            <label>Couleur Boutons</label>
-            <input
-              type="color"
-              data-binding="theme.btnBg"
-              onchange="updateField(this)"
-            />
+            <div class="row-2">
+              <div class="form-group">
+                <label for="site-phone">Téléphone</label>
+                <input
+                  type="text"
+                  id="site-phone"
+                  data-binding="site.phone"
+                  oninput="updateField(this)"
+                />
+              </div>
+              <div class="form-group">
+                <label for="site-email">Email</label>
+                <input
+                  type="email"
+                  id="site-email"
+                  data-binding="site.email"
+                  oninput="updateField(this)"
+                />
+              </div>
+            </div>
 
-            <label>Texte Boutons</label>
-            <input
-              type="color"
-              data-binding="theme.btnText"
-              onchange="updateField(this)"
-            />
+            <div class="form-group">
+              <label for="site-address">Adresse physique</label>
+              <input
+                type="text"
+                id="site-address"
+                data-binding="site.address"
+                oninput="updateField(this)"
+              />
+            </div>
 
-            <label>Arrondi des Boutons (px)</label>
-            <input
-              type="range"
-              min="0"
-              max="30"
-              data-binding="theme.btnRadius"
-              oninput="updateField(this)"
-            />
+            <div class="form-group">
+              <label for="site-hours">Horaires d'ouverture</label>
+              <input
+                type="text"
+                id="site-hours"
+                data-binding="site.hours"
+                oninput="updateField(this)"
+              />
+            </div>
 
-            <label>Police des Titres</label>
-            <select
-              data-binding="theme.fontHeading"
-              onchange="updateField(this)"
-            >
-              <option value="'Cormorant Garamond', serif">
-                Cormorant Garamond
-              </option>
-              <option value="'Playfair Display', serif">
-                Playfair Display
-              </option>
-              <option value="'Montserrat', sans-serif">Montserrat</option>
-            </select>
-          </div>
-        </details>
+            <fieldset>
+              <legend>Réseaux sociaux</legend>
+              <div class="form-group">
+                <label for="social-instagram">Lien Instagram</label>
+                <input
+                  type="url"
+                  id="social-instagram"
+                  data-binding="site.socials.instagram"
+                  oninput="updateField(this)"
+                />
+              </div>
+              <div class="form-group">
+                <label for="social-facebook">Lien Facebook</label>
+                <input
+                  type="url"
+                  id="social-facebook"
+                  data-binding="site.socials.facebook"
+                  oninput="updateField(this)"
+                />
+              </div>
+            </fieldset>
+          </section>
 
-        <!-- Accordéon : Chambres -->
-        <details class="menu-group">
-          <summary>🏨 Chambres</summary>
-          <div class="group-content" id="rooms-container">
-            <!-- Les cartes de gestion des chambres seront injectées dynamiquement -->
-          </div>
-          <button onclick="addRoom()" class="btn-add">
-            + Ajouter une chambre
-          </button>
-        </details>
+          <!-- 2. ONGLET APPARENCE -->
+          <section id="tab-appearance" class="tab-pane">
+            <h2>Thème & Couleurs globales</h2>
+
+            <div class="color-grid">
+              <div class="form-group">
+                <label for="color-primary">Couleur principale</label>
+                <input
+                  type="color"
+                  id="color-primary"
+                  data-binding="theme.primary"
+                  onchange="updateField(this)"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="color-secondary">Couleur secondaire</label>
+                <input
+                  type="color"
+                  id="color-secondary"
+                  data-binding="theme.secondary"
+                  onchange="updateField(this)"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="color-accent">Couleur d'accent</label>
+                <input
+                  type="color"
+                  id="color-accent"
+                  data-binding="theme.accent"
+                  onchange="updateField(this)"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="color-background">Fond de page</label>
+                <input
+                  type="color"
+                  id="color-background"
+                  data-binding="theme.background"
+                  onchange="updateField(this)"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="color-card">Fond des cartes</label>
+                <input
+                  type="color"
+                  id="color-card"
+                  data-binding="theme.card"
+                  onchange="updateField(this)"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="color-text">Couleur des textes</label>
+                <input
+                  type="color"
+                  id="color-text"
+                  data-binding="theme.text"
+                  onchange="updateField(this)"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="color-button">Couleur des boutons</label>
+                <input
+                  type="color"
+                  id="color-button"
+                  data-binding="theme.button"
+                  onchange="updateField(this)"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="color-button-text">Texte des boutons</label>
+                <input
+                  type="color"
+                  id="color-button-text"
+                  data-binding="theme.buttonText"
+                  onchange="updateField(this)"
+                />
+              </div>
+            </div>
+
+            <hr />
+
+            <h2>Formes et Ombres</h2>
+            <div class="form-group">
+              <label for="border-radius">Arrondi des angles (px)</label>
+              <input
+                type="range"
+                id="border-radius"
+                min="0"
+                max="24"
+                data-binding="theme.borderRadius"
+                oninput="updateField(this)"
+              />
+            </div>
+          </section>
+
+          <!-- 3. ONGLET TYPOGRAPHIE -->
+          <section id="tab-typography" class="tab-pane">
+            <h2>Polices de caractères</h2>
+
+            <div class="form-group">
+              <label for="heading-font">Police des titres</label>
+              <select
+                id="heading-font"
+                data-binding="typography.headingFont"
+                onchange="updateField(this)"
+              >
+                <option value="'Cormorant Garamond', serif">
+                  Cormorant Garamond (Élégant / Luxe)
+                </option>
+                <option value="'Playfair Display', serif">
+                  Playfair Display (Classique)
+                </option>
+                <option value="'Montserrat', sans-serif">
+                  Montserrat (Moderne)
+                </option>
+                <option value="'Cinzel', serif">Cinzel (Haut de gamme)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="body-font">Police du texte</label>
+              <select
+                id="body-font"
+                data-binding="typography.bodyFont"
+                onchange="updateField(this)"
+              >
+                <option value="'Inter', sans-serif">
+                  Inter (Neutre & Lisible)
+                </option>
+                <option value="'Roboto', sans-serif">Roboto (Moderne)</option>
+                <option value="'Lato', sans-serif">Lato (Doux)</option>
+                <option value="'Open Sans', sans-serif">
+                  Open Sans (Standard)
+                </option>
+              </select>
+            </div>
+          </section>
+
+          <!-- 4. ONGLET IMAGES -->
+          <section id="tab-images" class="tab-pane">
+            <h2>Médias principaux</h2>
+
+            <div class="image-field-block">
+              <label>Logo officiel</label>
+              <div class="image-uploader">
+                <img
+                  id="logo-preview"
+                  src=""
+                  alt="Aperçu Logo"
+                  class="thumb-preview"
+                />
+                <input
+                  type="file"
+                  accept="image/*"
+                  onchange="handleImageUpload(this, 'site.logo', 'logo-preview')"
+                />
+              </div>
+            </div>
+
+            <div class="image-field-block">
+              <label>Favicon (icône d'onglet)</label>
+              <div class="image-uploader">
+                <img
+                  id="favicon-preview"
+                  src=""
+                  alt="Aperçu Favicon"
+                  class="thumb-preview mini"
+                />
+                <input
+                  type="file"
+                  accept="image/*"
+                  onchange="handleImageUpload(this, 'site.favicon', 'favicon-preview')"
+                />
+              </div>
+            </div>
+          </section>
+
+          <!-- 5. ONGLET CHAMBRES -->
+          <section id="tab-rooms" class="tab-pane">
+            <div class="pane-header">
+              <h2>Gestion des Chambres</h2>
+              <button class="btn-primary" onclick="addRoom()">
+                + Ajouter une chambre
+              </button>
+            </div>
+            <div id="rooms-manager-container" class="crud-list"></div>
+          </section>
+
+          <!-- 6. ONGLET RESTAURANT -->
+          <section id="tab-restaurant" class="tab-pane">
+            <div class="pane-header">
+              <h2>Carte du Restaurant</h2>
+            </div>
+            <p class="info-text">
+              Configurez les entrées, plats et desserts de votre établissement.
+            </p>
+            <div id="restaurant-manager-container" class="crud-list"></div>
+          </section>
+
+          <!-- 7. ONGLET SERVICES -->
+          <section id="tab-services" class="tab-pane">
+            <div class="pane-header">
+              <h2>Services & Extras</h2>
+            </div>
+            <div id="services-manager-container" class="crud-list"></div>
+          </section>
+
+          <!-- 8. ONGLET RÉGLAGES -->
+          <section id="tab-settings" class="tab-pane">
+            <h2>Paramètres système & Paiement</h2>
+
+            <div class="form-group">
+              <label for="currency-symbol">Symbole de devise</label>
+              <input
+                type="text"
+                id="currency-symbol"
+                data-binding="settings.currencySymbol"
+                oninput="updateField(this)"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="stripe-key">Clé publique Stripe (Paiement)</label>
+              <input
+                type="text"
+                id="stripe-key"
+                data-binding="settings.stripePublicKey"
+                oninput="updateField(this)"
+              />
+            </div>
+          </section>
+        </div>
       </aside>
 
-      <!-- Aperçu Visuel Live (Iframe) -->
-      <main class="preview-stage">
-        <div id="wrapper" class="viewport-desktop">
-          <iframe id="preview-frame" src="../index.html"></iframe>
+      <!-- ZONE D'APERÇU DU VRAI SITE (DROITE) -->
+      <main class="preview-viewport">
+        <div id="preview-wrapper" class="device-desktop">
+          <iframe
+            id="preview-frame"
+            src="../index.html"
+            title="Aperçu du site en direct"
+          ></iframe>
         </div>
       </main>
     </div>
 
+    <!-- SCRIPT DU SYSTEME D'ONGLETS ET DE L'IPHONE PREVIEW -->
+    <script>
+      // Gestionnaire de bascule des onglets
+      document.querySelectorAll(".tab-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          document
+            .querySelectorAll(".tab-btn")
+            .forEach((b) => b.classList.remove("active"));
+          document
+            .querySelectorAll(".tab-pane")
+            .forEach((p) => p.classList.remove("active"));
+
+          btn.classList.add("active");
+          const paneId = btn.getAttribute("data-tab");
+          document.getElementById(paneId).classList.add("active");
+        });
+      });
+
+      // Bascule de format d'écran pour l'iframe (Desktop / Tablette / Mobile)
+      function setPreviewDevice(device) {
+        document
+          .querySelectorAll(".device-btn")
+          .forEach((b) => b.classList.remove("active"));
+        document
+          .querySelector(`[data-device="${device}"]`)
+          .classList.add("active");
+
+        const wrapper = document.getElementById("preview-wrapper");
+        wrapper.className = `device-${device}`;
+      }
+    </script>
+
+    <!-- Script principal de gestion du Customizer -->
     <script src="customizer.js"></script>
   </body>
 </html>

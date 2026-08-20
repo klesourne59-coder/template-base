@@ -1,39 +1,39 @@
 :root {
-  /* Système de Couleurs Global */
+  /* Couleurs unifiées */
   --color-primary: #c5a059;
   --color-secondary: #1a1a1a;
-  --color-accent: #d32f2f;
-  --color-bg: #ffffff;
+  --color-accent: #d4af37;
+  --color-background: #ffffff;
   --color-card: #f9f9f9;
   --color-text: #333333;
   --color-border: #e0e0e0;
-  --btn-bg: var(--color-primary);
-  --btn-text: #ffffff;
+  --color-button: #c5a059;
+  --color-button-text: #ffffff;
 
-  /* Typographies & Boutons */
+  /* Formes et Ombres */
+  --radius: 6px;
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+  /* Typographies */
   --font-heading: 'Cormorant Garamond', serif;
   --font-body: 'Inter', sans-serif;
-  --btn-radius: 4px;
-  --btn-padding: 12px 24px;
-  --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
 
 /* Application globale des variables */
 body {
-  background-color: var(--color-bg);
+  background-color: var(--color-background);
   color: var(--color-text);
   font-family: var(--font-body);
 }
 
-h1, h2, h3, h4, .font-heading {
+h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
 }
 
-.btn-primary {
-  background-color: var(--btn-bg);
-  color: var(--btn-text);
-  border-radius: var(--btn-radius);
-  padding: var(--btn-padding);
+.btn-primary, button[type="submit"], .booking-btn {
+  background-color: var(--color-button) !important;
+  color: var(--color-button-text) !important;
+  border-radius: var(--radius) !important;
+  box-shadow: var(--shadow);
   border: none;
-  transition: all 0.3s ease;
 }

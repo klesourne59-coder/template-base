@@ -1,141 +1,166 @@
-// Global config state
+// config-loader.js — Code complet et corrigé
+
 let currentConfig = {};
 
-// 1. Initialisation : Chargement du fichier de configuration ou du brouillon local
-document.addEventListener('DOMContentLoaded', () => {
-  fetch('site-config.json')
-    .then((res) => {
-      if (!res.ok) throw new Error('Erreur de chargement du fichier site-config.json');
-      return res.json();
-    })
-    .then((defaultConfig) => {
-      const saved = localStorage.getItem('site_config_draft');
-      currentConfig = saved ? JSON.parse(saved) : defaultConfig;
+document.addEventListener('DOMContentLoaded', async () => {
+  await initConfig();
+  
+  // Écoute des messages envoyés en temps réel par le customizer (iframe)
+  window.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'UPDATE_CONFIG') {
+      currentConfig = event.data.config;
       applyConfig(currentConfig);
-    })
-    .catch((err) => console.error('Config Loader Error:', err));
+    }
+  });
 });
 
-// 2. Écoute des mises à jour en temps réel (Customizer iframe)
-window.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'UPDATE_CONFIG') {
-    currentConfig = event.data.config;
-    applyConfig(currentConfig);
+/**
+ * Initialise la configuration au chargement
+ */
+async function initConfig() {
+  const localData = localStorage.getItem('site_config_live');
+  if (localData) {
+    try {
+      currentConfig = JSON.parse(localData);
+      applyConfig(currentConfig);
+      return;
+    } catch (e) {
+      console.warn('LocalStorage invalide, chargement du fichier site-config.json.');
+    }
   }
-});
 
-// 3. Application globale de la configuration au DOM
+  try {
+    const res = await fetch('site-config.json');
+    if (res.ok) {
+      currentConfig = await res.json();
+      applyConfig(currentConfig);
+    }
+  } catch (err) {
+    console.error('Erreur lors du chargement de site-config.json :', err);
+  }
+}
+
+/**
+ * Applique la configuration à l'ensemble de la page HTML
+ */
 function applyConfig(config) {
   if (!config) return;
 
-  // Binding des champs simples (data-config="hero.title", etc.)
-  document.querySelectorAll('[data-config]').forEach((el) => {
-    const path = el.getAttribute('data-config').split('.');
-    let val = config;
-    path.forEach((key) => {
-      val = val ? val[key] : undefined;
-    });
+  // 1. THÈME & COULEURS (Variables CSS)
+  const root = document.documentElement;
+  if (config.theme) {
+    if (config.theme.primary) root.style.setProperty('--primary-color', config.theme.primary);
+    if (config.theme.secondary) root.style.setProperty('--secondary-color', config.theme.secondary);
+    if (config.theme.accent) root.style.setProperty('--accent-color', config.theme.accent);
+  }
 
-    if (val !== undefined && val !== null) {
-      if (el.tagName === 'IMG') {
-        el.src = val;
-      } else if (el.tagName === 'A' && el.getAttribute('href')?.startsWith('tel:')) {
-        el.href = `tel:${val}`;
-        el.textContent = val;
-      } else if (el.tagName === 'A' && el.getAttribute('href')?.startsWith('mailto:')) {
-        el.href = `mailto:${val}`;
-        el.textContent = val;
-      } else {
-        el.textContent = val;
-      }
+  // 2. TYPOGRAPHIE
+  if (config.typography) {
+    if (config.typography.headingFont) {
+      root.style.setProperty('--font-heading', config.typography.headingFont);
     }
-  });
+    if (config.typography.bodyFont) {
+      root.style.setProperty('--font-body', config.typography.bodyFont);
+    }
+  }
 
-  // Rendu des listes dynamiques
-  renderRooms(config.rooms);
-  renderRestaurant(config.restaurant);
-  renderServices(config.services);
+  // 3. IDENTITÉ DU SITE & LOGO
+  if (config.site) {
+    updateText('[data-config="site.name"]', config.site.name);
+    updateImage('[data-config="site.logo"]', config.site.logo);
+  }
+
+  // 4. EN-TÊTE & HERO
+  if (config.hero) {
+    updateText('[data-config="hero.title"]', config.hero.title);
+    updateText('[data-config="hero.subtitle"]', config.hero.subtitle);
+  }
+
+  // 5. CONTACT
+  if (config.contact) {
+    updateText('[data-config="contact.phone"]', config.contact.phone);
+    updateText('[data-config="contact.email"]', config.contact.email);
+  }
+
+  // 6. COLLECTIONS DYNAMIQUES
+  renderRooms(config.rooms || []);
+  renderRestaurant(config.restaurant || []);
+  renderServices(config.services || []);
 }
 
-// 4. Rendu dynamique des Chambres
-function renderRooms(rooms) {
-  const container = document.getElementById('rooms-list');
-  if (!container || !Array.isArray(rooms)) return;
+/**
+ * Helper pour mettre à jour le texte d'un ou plusieurs éléments
+ */
+function updateText(selector, text) {
+  if (text === undefined || text === null) return;
+  document.querySelectorAll(selector).forEach(el => {
+    el.textContent = text;
+  });
+}
 
-  container.innerHTML = rooms
-    .map(
-      (room) => `
+/**
+ * Helper pour mettre à jour la source d'une image
+ */
+function updateImage(selector, src) {
+  if (!src) return;
+  document.querySelectorAll(selector).forEach(img => {
+    img.src = src;
+  });
+}
+
+/**
+ * Rendu dynamique de la liste des chambres
+ */
+function renderRooms(rooms) {
+  const container = document.querySelector('#rooms-list, #rooms-container, [data-config-list="rooms"]');
+  if (!container) return;
+
+  container.innerHTML = rooms.map(room => `
     <article class="room-card">
-      ${room.images && room.images[0] ? `<img src="${room.images[0]}" alt="${room.name || ''}" class="room-image">` : ''}
+      ${room.image ? `<img src="${room.image}" alt="${room.name || ''}" class="room-image" />` : ''}
       <div class="room-details">
         <h3>${room.name || 'Chambre'}</h3>
+        ${room.price ? `<p class="room-price">${room.price} €</p>` : ''}
         <p class="room-description">${room.description || ''}</p>
-        <ul class="room-specs">
-          ${room.capacity ? `<li><strong>Capacité :</strong> ${room.capacity} pers.</li>` : ''}
-          ${room.surface ? `<li><strong>Surface :</strong> ${room.surface} m²</li>` : ''}
-        </ul>
-        <div class="room-footer">
-          <span class="room-price">${room.pricePerNight ? `${room.pricePerNight} € / nuit` : ''}</span>
-          <a href="reservation.html?room=${encodeURIComponent(room.id || room.name)}" class="btn-book">Réserver</a>
-        </div>
       </div>
     </article>
-  `
-    )
-    .join('');
+  `).join('');
 }
 
-// 5. Rendu dynamique du Menu Restaurant (Catégories + Plats)
-function renderRestaurant(restaurantData) {
-  const container = document.getElementById('restaurant-menu');
-  if (!container || !Array.isArray(restaurantData)) return;
+/**
+ * Rendu dynamique de la carte du restaurant
+ */
+function renderRestaurant(items) {
+  const container = document.querySelector('#restaurant-list, #restaurant-container, [data-config-list="restaurant"]');
+  if (!container) return;
 
-  container.innerHTML = restaurantData
-    .map(
-      (cat) => `
-    <div class="menu-category">
-      <h3 class="category-title">${cat.category || 'Catégorie'}</h3>
-      <div class="menu-items-grid">
-        ${(cat.items || [])
-          .map(
-            (item) => `
-          <div class="menu-item">
-            ${item.image ? `<img src="${item.image}" alt="${item.name || ''}" class="menu-item-img">` : ''}
-            <div class="menu-item-content">
-              <div class="menu-item-header">
-                <span class="item-name">${item.name || ''}</span>
-                <span class="item-price">${item.price ? `${item.price} €` : ''}</span>
-              </div>
-              <p class="item-description">${item.description || ''}</p>
-            </div>
-          </div>
-        `
-          )
-          .join('')}
+  container.innerHTML = items.map(item => `
+    <article class="restaurant-card">
+      ${item.image ? `<img src="${item.image}" alt="${item.name || ''}" class="restaurant-image" />` : ''}
+      <div class="restaurant-details">
+        <h3>${item.name || 'Plat'}</h3>
+        ${item.price ? `<p class="restaurant-price">${item.price} €</p>` : ''}
+        <p class="restaurant-description">${item.description || ''}</p>
       </div>
-    </div>
-  `
-    )
-    .join('');
+    </article>
+  `).join('');
 }
 
-// 6. Rendu dynamique des Services (Spa, Activités, etc.)
+/**
+ * Rendu dynamique des services
+ */
 function renderServices(services) {
-  const container = document.getElementById('services-list');
-  if (!container || !Array.isArray(services)) return;
+  const container = document.querySelector('#services-list, #services-container, [data-config-list="services"]');
+  if (!container) return;
 
-  container.innerHTML = services
-    .map(
-      (service) => `
-    <div class="service-card">
-      ${service.image ? `<img src="${service.image}" alt="${service.name || ''}" class="service-image">` : ''}
-      <div class="service-info">
+  container.innerHTML = services.map(service => `
+    <article class="service-card">
+      ${service.image ? `<img src="${service.image}" alt="${service.name || ''}" class="service-image" />` : ''}
+      <div class="service-details">
         <h3>${service.name || 'Service'}</h3>
-        <p>${service.description || ''}</p>
-        ${service.price ? `<span class="service-price">${service.price} €</span>` : ''}
+        ${service.price ? `<p class="service-price">${service.price} €</p>` : ''}
+        <p class="service-description">${service.description || ''}</p>
       </div>
-    </div>
-  `
-    )
-    .join('');
+    </article>
+  `).join('');
 }

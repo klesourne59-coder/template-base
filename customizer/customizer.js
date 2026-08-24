@@ -1,22 +1,51 @@
+// customizer/customizer.js — Code complet et corrigé
+
 let currentConfig = {};
-const iframe = document.getElementById('preview-frame');
 
-// 1. Initialisation des données depuis site-config.json
-fetch('site-config.json')
-  .then((res) => {
-    if (!res.ok) throw new Error('Erreur de chargement de site-config.json');
-    return res.json();
-  })
-  .then((defaultConfig) => {
-    const saved = localStorage.getItem('site_config_draft');
-    currentConfig = saved ? JSON.parse(saved) : defaultConfig;
-    bindFormControls(currentConfig);
-    renderAllManagers();
-  })
-  .catch((err) => console.error('Erreur Customizer Init :', err));
+// 1. Initialisation globale au chargement de la page
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadInitialConfig();
+  bindStaticInputs();
+  renderAllCollections();
+  setupAddButtons();
 
-// 2. Synchronisation instantanée avec l'iframe
-function syncPreview() {
+  const iframe = document.getElementById('preview-iframe');
+  if (iframe) {
+    iframe.addEventListener('load', () => notifyPreview());
+  }
+});
+
+/**
+ * Charge la configuration depuis localStorage ou ../site-config.json
+ */
+async function loadInitialConfig() {
+  const localData = localStorage.getItem('site_config_live');
+  if (localData) {
+    try {
+      currentConfig = JSON.parse(localData);
+      return;
+    } catch (e) {
+      console.warn('LocalStorage invalide, rechargement du fichier d’origine.');
+    }
+  }
+
+  try {
+    const res = await fetch('../site-config.json');
+    if (res.ok) {
+      currentConfig = await res.json();
+    }
+  } catch (err) {
+    console.error('Erreur lors du chargement de site-config.json :', err);
+  }
+}
+
+/**
+ * Met à jour le localStorage et envoie la nouvelle config à l'iframe en direct
+ */
+function notifyPreview() {
+  localStorage.setItem('site_config_live', JSON.stringify(currentConfig));
+
+  const iframe = document.getElementById('preview-iframe');
   if (iframe && iframe.contentWindow) {
     iframe.contentWindow.postMessage(
       { type: 'UPDATE_CONFIG', config: currentConfig },
@@ -25,394 +54,228 @@ function syncPreview() {
   }
 }
 
-// 3. Mise à jour générique des champs
-function updateField(input) {
-  const path = input.getAttribute('data-binding').split('.');
-  let obj = currentConfig;
-
-  for (let i = 0; i < path.length - 1; i++) {
-    if (!obj[path[i]]) obj[path[i]] = {};
-    obj = obj[path[i]];
-  }
-
-  const val = input.type === 'number' || input.type === 'range' ? Number(input.value) : input.value;
-  obj[path[path.length - 1]] = val;
-  syncPreview();
-}
-
-// 4. Gestion visuelle des images (Base64)
-function handleImageUpload(fileInput, configPath, previewElemId) {
-  const file = fileInput.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = function (e) {
-    const base64Img = e.target.result;
-    if (previewElemId) {
-      const imgPreview = document.getElementById(previewElemId);
-      if (imgPreview) imgPreview.src = base64Img;
+/**
+ * Lie les champs simples (data-field) et le champ d'import de logo
+ */
+function bindStaticInputs() {
+  document.querySelectorAll('[data-field]').forEach(input => {
+    const path = input.getAttribute('data-field');
+    const value = getNestedValue(currentConfig, path);
+    if (value !== undefined && value !== null) {
+      input.value = value;
     }
 
-    const path = configPath.split('.');
-    let obj = currentConfig;
-    for (let i = 0; i < path.length - 1; i++) {
-      if (!obj[path[i]]) obj[path[i]] = {};
-      obj = obj[path[i]];
-    }
-    obj[path[path.length - 1]] = base64Img;
-
-    syncPreview();
-  };
-  reader.readAsDataURL(file);
-}
-
-// 5. GESTIONNAIRE DES CHAMBRES (CRUD)
-function renderRoomsManager() {
-  const container = document.getElementById('rooms-manager-container');
-  if (!container) return;
-
-  container.innerHTML = '';
-  if (!currentConfig.rooms) currentConfig.rooms = [];
-
-  currentConfig.rooms.forEach((room, index) => {
-    const card = document.createElement('div');
-    card.className = 'crud-card';
-    card.innerHTML = `
-      <div class="crud-header">
-        <strong>${room.name || 'Nouvelle Chambre'}</strong>
-        <button onclick="removeRoom(${index})" class="btn-danger">Supprimer</button>
-      </div>
-      <div class="crud-body">
-        <label>Nom de la chambre</label>
-        <input type="text" value="${room.name || ''}" oninput="currentConfig.rooms[${index}].name = this.value; syncPreview();">
-
-        <label>Prix par nuit (€)</label>
-        <input type="number" value="${room.pricePerNight || 0}" oninput="currentConfig.rooms[${index}].pricePerNight = Number(this.value); syncPreview();">
-
-        <div class="row-2">
-          <div>
-            <label>Capacité (pers.)</label>
-            <input type="number" value="${room.capacity || 2}" oninput="currentConfig.rooms[${index}].capacity = Number(this.value); syncPreview();">
-          </div>
-          <div>
-            <label>Surface (m²)</label>
-            <input type="number" value="${room.surface || 20}" oninput="currentConfig.rooms[${index}].surface = Number(this.value); syncPreview();">
-          </div>
-        </div>
-
-        <label>Description</label>
-        <textarea oninput="currentConfig.rooms[${index}].description = this.value; syncPreview();">${room.description || ''}</textarea>
-
-        <label>Photo Principale</label>
-        <div class="image-uploader-inline">
-          <img src="${(room.images && room.images[0]) ? room.images[0] : ''}" id="room-img-preview-${index}" class="thumb-preview">
-          <input type="file" accept="image/*" onchange="uploadRoomImage(this, ${index})">
-        </div>
-      </div>
-    `;
-    container.appendChild(card);
-  });
-}
-
-function addRoom() {
-  if (!currentConfig.rooms) currentConfig.rooms = [];
-  currentConfig.rooms.push({
-    id: 'room-' + Date.now(),
-    name: 'Nouvelle Chambre',
-    pricePerNight: 150,
-    capacity: 2,
-    surface: 25,
-    description: '',
-    amenities: ['Wi-Fi'],
-    images: []
-  });
-  renderRoomsManager();
-  syncPreview();
-}
-
-function removeRoom(index) {
-  currentConfig.rooms.splice(index, 1);
-  renderRoomsManager();
-  syncPreview();
-}
-
-function uploadRoomImage(fileInput, index) {
-  const file = fileInput.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = function (e) {
-    if (!currentConfig.rooms[index].images) currentConfig.rooms[index].images = [];
-    currentConfig.rooms[index].images[0] = e.target.result;
-    const preview = document.getElementById(`room-img-preview-${index}`);
-    if (preview) preview.src = e.target.result;
-    syncPreview();
-  };
-  reader.readAsDataURL(file);
-}
-
-// 6. GESTIONNAIRE DU RESTAURANT (CRUD)
-function renderRestaurantManager() {
-  const container = document.getElementById('restaurant-manager-container');
-  if (!container) return;
-
-  container.innerHTML = '';
-  if (!currentConfig.restaurant) currentConfig.restaurant = [];
-
-  currentConfig.restaurant.forEach((cat, catIndex) => {
-    const catCard = document.createElement('div');
-    catCard.className = 'crud-card';
-    catCard.innerHTML = `
-      <div class="crud-header">
-        <input type="text" value="${cat.category || ''}" placeholder="Nom de la catégorie (ex: Entrées)" oninput="currentConfig.restaurant[${catIndex}].category = this.value; syncPreview();" style="font-weight: bold; font-size: 1rem;">
-        <button onclick="removeRestaurantCategory(${catIndex})" class="btn-danger">Supprimer catégorie</button>
-      </div>
-      <div class="crud-body">
-        <div id="items-cat-${catIndex}" class="crud-list">
-          ${(cat.items || []).map((item, itemIndex) => `
-            <div class="crud-card" style="background: #020617; border-style: dashed; margin-top: 8px;">
-              <div class="crud-header">
-                <strong>${item.name || 'Nouveau plat'}</strong>
-                <button onclick="removeRestaurantItem(${catIndex}, ${itemIndex})" class="btn-danger" style="padding: 4px 8px; font-size: 0.75rem;">Supprimer plat</button>
-              </div>
-              <div class="crud-body">
-                <label>Nom du plat</label>
-                <input type="text" value="${item.name || ''}" oninput="currentConfig.restaurant[${catIndex}].items[${itemIndex}].name = this.value; syncPreview();">
-
-                <div class="row-2">
-                  <div>
-                    <label>Prix (€)</label>
-                    <input type="number" value="${item.price || 0}" oninput="currentConfig.restaurant[${catIndex}].items[${itemIndex}].price = Number(this.value); syncPreview();">
-                  </div>
-                  <div>
-                    <label>Photo du plat</label>
-                    <div class="image-uploader-inline">
-                      <img src="${item.image || ''}" id="rest-img-preview-${catIndex}-${itemIndex}" class="thumb-preview mini">
-                      <input type="file" accept="image/*" onchange="uploadRestaurantImage(this, ${catIndex}, ${itemIndex})">
-                    </div>
-                  </div>
-                </div>
-
-                <label>Description</label>
-                <textarea rows="2" oninput="currentConfig.restaurant[${catIndex}].items[${itemIndex}].description = this.value; syncPreview();">${item.description || ''}</textarea>
-              </div>
-            </div>
-          `).join('')}
-        </div>
-        <button onclick="addRestaurantItem(${catIndex})" class="btn-secondary" style="width: 100%; margin-top: 10px;">+ Ajouter un plat à ${cat.category || 'cette catégorie'}</button>
-      </div>
-    `;
-    container.appendChild(catCard);
+    input.addEventListener('input', (e) => {
+      setNestedValue(currentConfig, path, e.target.value);
+      notifyPreview();
+    });
   });
 
-  const addCatBtn = document.createElement('button');
-  addCatBtn.className = 'btn-primary';
-  addCatBtn.style.marginTop = '12px';
-  addCatBtn.innerText = '+ Ajouter une catégorie de menu';
-  addCatBtn.onclick = addRestaurantCategory;
-  container.appendChild(addCatBtn);
-}
+  const logoInput = document.getElementById('site-logo-input');
+  if (logoInput) {
+    logoInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
 
-function addRestaurantCategory() {
-  if (!currentConfig.restaurant) currentConfig.restaurant = [];
-  currentConfig.restaurant.push({
-    category: 'Nouvelle Catégorie',
-    items: []
-  });
-  renderRestaurantManager();
-  syncPreview();
-}
-
-function removeRestaurantCategory(catIndex) {
-  currentConfig.restaurant.splice(catIndex, 1);
-  renderRestaurantManager();
-  syncPreview();
-}
-
-function addRestaurantItem(catIndex) {
-  if (!currentConfig.restaurant[catIndex].items) currentConfig.restaurant[catIndex].items = [];
-  currentConfig.restaurant[catIndex].items.push({
-    id: 'rest-' + Date.now(),
-    name: 'Nouveau plat',
-    description: '',
-    price: 18,
-    image: ''
-  });
-  renderRestaurantManager();
-  syncPreview();
-}
-
-function removeRestaurantItem(catIndex, itemIndex) {
-  currentConfig.restaurant[catIndex].items.splice(itemIndex, 1);
-  renderRestaurantManager();
-  syncPreview();
-}
-
-function uploadRestaurantImage(fileInput, catIndex, itemIndex) {
-  const file = fileInput.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = function (e) {
-    currentConfig.restaurant[catIndex].items[itemIndex].image = e.target.result;
-    const preview = document.getElementById(`rest-img-preview-${catIndex}-${itemIndex}`);
-    if (preview) preview.src = e.target.result;
-    syncPreview();
-  };
-  reader.readAsDataURL(file);
-}
-
-// 7. GESTIONNAIRE DES SERVICES (CRUD)
-function renderServicesManager() {
-  const container = document.getElementById('services-manager-container');
-  if (!container) return;
-
-  container.innerHTML = '';
-  if (!currentConfig.services) currentConfig.services = [];
-
-  currentConfig.services.forEach((serv, index) => {
-    const card = document.createElement('div');
-    card.className = 'crud-card';
-    card.innerHTML = `
-      <div class="crud-header">
-        <strong>${serv.name || 'Nouveau Service'}</strong>
-        <button onclick="removeService(${index})" class="btn-danger">Supprimer</button>
-      </div>
-      <div class="crud-body">
-        <label>Nom du service</label>
-        <input type="text" value="${serv.name || ''}" oninput="currentConfig.services[${index}].name = this.value; syncPreview();">
-
-        <div class="row-2">
-          <div>
-            <label>Prix (€)</label>
-            <input type="number" value="${serv.price || 0}" oninput="currentConfig.services[${index}].price = Number(this.value); syncPreview();">
-          </div>
-          <div>
-            <label>Photo</label>
-            <div class="image-uploader-inline">
-              <img src="${serv.image || ''}" id="serv-img-preview-${index}" class="thumb-preview mini">
-              <input type="file" accept="image/*" onchange="uploadServiceImage(this, ${index})">
-            </div>
-          </div>
-        </div>
-
-        <label>Description</label>
-        <textarea rows="2" oninput="currentConfig.services[${index}].description = this.value; syncPreview();">${serv.description || ''}</textarea>
-      </div>
-    `;
-    container.appendChild(card);
-  });
-
-  const addBtn = document.createElement('button');
-  addBtn.className = 'btn-primary';
-  addBtn.style.marginTop = '12px';
-  addBtn.innerText = '+ Ajouter un service';
-  addBtn.onclick = addService;
-  container.appendChild(addBtn);
-}
-
-function addService() {
-  if (!currentConfig.services) currentConfig.services = [];
-  currentConfig.services.push({
-    id: 'serv-' + Date.now(),
-    name: 'Nouveau service',
-    description: '',
-    price: 35,
-    image: ''
-  });
-  renderServicesManager();
-  syncPreview();
-}
-
-function removeService(index) {
-  currentConfig.services.splice(index, 1);
-  renderServicesManager();
-  syncPreview();
-}
-
-function uploadServiceImage(fileInput, index) {
-  const file = fileInput.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = function (e) {
-    currentConfig.services[index].image = e.target.result;
-    const preview = document.getElementById(`serv-img-preview-${index}`);
-    if (preview) preview.src = e.target.result;
-    syncPreview();
-  };
-  reader.readAsDataURL(file);
-}
-
-// 8. EXECUTION GLOBALE DE RENDU
-function renderAllManagers() {
-  renderRoomsManager();
-  renderRestaurantManager();
-  renderServicesManager();
-}
-
-// 9. SAUVEGARDE, REINITIALISATION & EXPORT
-function saveConfig() {
-  localStorage.setItem('site_config_draft', JSON.stringify(currentConfig));
-  alert('Configuration enregistrée avec succès dans le navigateur !');
-}
-
-function resetConfig() {
-  if (confirm('Voulez-vous réinitialiser toutes vos modifications et revenir au modèle d\'origine ?')) {
-    localStorage.removeItem('site_config_draft');
-    location.reload();
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setNestedValue(currentConfig, 'site.logo', event.target.result);
+        notifyPreview();
+      };
+      reader.readAsDataURL(file);
+    });
   }
 }
 
-async function exportSiteZip() {
-  if (typeof JSZip === 'undefined') {
-    alert('Erreur: La bibliothèque JSZip n\'est pas disponible.');
-    return;
+/**
+ * Génère le rendu de toutes les collections (chambres, restaurant, services)
+ */
+function renderAllCollections() {
+  renderCollection('rooms', '#rooms-container', createCollectionItemHTML);
+  renderCollection('restaurant', '#restaurant-container', createCollectionItemHTML);
+  renderCollection('services', '#services-container', createCollectionItemHTML);
+}
+
+/**
+ * Rendu dynamique d'une liste
+ */
+function renderCollection(key, containerSelector, templateFn) {
+  const container = document.querySelector(containerSelector);
+  if (!container) return;
+
+  if (!Array.isArray(currentConfig[key])) {
+    currentConfig[key] = [];
   }
 
-  const zip = new JSZip();
+  container.innerHTML = currentConfig[key].map((item, index) => templateFn(key, item, index)).join('');
+  attachCollectionEvents(key, containerSelector);
+}
 
-  // Injecte la source de vérité unifiée
-  zip.file('site-config.json', JSON.stringify(currentConfig, null, 2));
+/**
+ * HTML d'une carte d'élément
+ */
+function createCollectionItemHTML(key, item, index) {
+  return `
+    <div class="item-card" data-key="${key}" data-index="${index}" style="border: 1px solid #cbd5e1; padding: 1rem; margin-bottom: 1rem; border-radius: 6px; background: #ffffff;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+        <strong>Élément #${index + 1}</strong>
+        <button type="button" class="btn-delete" data-key="${key}" data-index="${index}" style="color: #ef4444; background: none; border: none; cursor: pointer; font-weight: bold;">Supprimer</button>
+      </div>
 
-  // Fichiers du site à inclure dans l'archive
-  const filesToInclude = [
-    'index.html',
-    'reservation.html',
-    'styles.css',
-    'scripts.js',
-    'config-loader.js',
-    'favicon.ico'
+      <div class="form-group" style="margin-bottom: 0.5rem;">
+        <label style="display: block; font-size: 0.8rem; font-weight: 600;">Nom :</label>
+        <input type="text" class="item-input" data-prop="name" value="${item.name || ''}" style="width: 100%; padding: 0.4rem; border: 1px solid #cbd5e1; border-radius: 4px;" />
+      </div>
+
+      <div class="form-group" style="margin-bottom: 0.5rem;">
+        <label style="display: block; font-size: 0.8rem; font-weight: 600;">Prix (€) :</label>
+        <input type="number" class="item-input" data-prop="price" value="${item.price ?? ''}" style="width: 100%; padding: 0.4rem; border: 1px solid #cbd5e1; border-radius: 4px;" />
+      </div>
+
+      <div class="form-group" style="margin-bottom: 0.5rem;">
+        <label style="display: block; font-size: 0.8rem; font-weight: 600;">Description :</label>
+        <textarea class="item-input" data-prop="description" rows="2" style="width: 100%; padding: 0.4rem; border: 1px solid #cbd5e1; border-radius: 4px;">${item.description || ''}</textarea>
+      </div>
+
+      <div class="form-group">
+        <label style="display: block; font-size: 0.8rem; font-weight: 600;">Image :</label>
+        <input type="file" class="item-file" data-key="${key}" data-index="${index}" accept="image/*" style="font-size: 0.8rem;" />
+        ${item.image ? `<img src="${item.image}" alt="Aperçu" style="max-height: 50px; display: block; margin-top: 5px; border-radius: 4px;" />` : ''}
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * Attache la saisie, l'upload d'image et la suppression sur les éléments
+ */
+function attachCollectionEvents(key, containerSelector) {
+  const container = document.querySelector(containerSelector);
+  if (!container) return;
+
+  container.querySelectorAll('.item-input').forEach(input => {
+    input.addEventListener('input', (e) => {
+      const card = e.target.closest('.item-card');
+      const index = parseInt(card.dataset.index, 10);
+      const prop = e.target.dataset.prop;
+      const value = e.target.type === 'number' ? parseFloat(e.target.value) || 0 : e.target.value;
+
+      currentConfig[key][index][prop] = value;
+      notifyPreview();
+    });
+  });
+
+  container.querySelectorAll('.item-file').forEach(fileInput => {
+    fileInput.addEventListener('change', (e) => {
+      const index = parseInt(e.target.dataset.index, 10);
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        currentConfig[key][index].image = event.target.result;
+        renderCollection(key, containerSelector, createCollectionItemHTML);
+        notifyPreview();
+      };
+      reader.readAsDataURL(file);
+    });
+  });
+
+  container.querySelectorAll('.btn-delete').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const index = parseInt(btn.dataset.index, 10);
+      currentConfig[key].splice(index, 1);
+      renderCollection(key, containerSelector, createCollectionItemHTML);
+      notifyPreview();
+    });
+  });
+}
+
+/**
+ * Configure les boutons d'ajout
+ */
+function setupAddButtons() {
+  const mappings = [
+    { btnId: 'btn-add-room', key: 'rooms', container: '#rooms-container' },
+    { btnId: 'btn-add-restaurant', key: 'restaurant', container: '#restaurant-container' },
+    { btnId: 'btn-add-service', key: 'services', container: '#services-container' }
   ];
 
-  for (const file of filesToInclude) {
-    try {
-      const response = await fetch(file);
-      if (response.ok) {
-        const content = await response.text();
-        zip.file(file, content);
+  mappings.forEach(({ btnId, key, container }) => {
+    const btn = document.getElementById(btnId);
+    if (!btn) return;
+
+    btn.addEventListener('click', () => {
+      if (!Array.isArray(currentConfig[key])) {
+        currentConfig[key] = [];
       }
-    } catch (e) {
-      console.warn(`Fichier omis lors de l'exportation : ${file}`);
-    }
-  }
 
-  zip.generateAsync({ type: 'blob' }).then(function (blobContent) {
-    saveAs(blobContent, 'mon-site-restau-complet.zip');
-  });
-}
+      const label = key === 'rooms' ? 'hébergement' : key === 'restaurant' ? 'plat' : 'service';
+      currentConfig[key].push({
+        id: `${key}-${Date.now()}`,
+        name: `Nouveau ${label}`,
+        price: 0,
+        description: '',
+        image: ''
+      });
 
-function bindFormControls(cfg) {
-  document.querySelectorAll('[data-binding]').forEach((el) => {
-    const path = el.getAttribute('data-binding').split('.');
-    let val = cfg;
-    path.forEach((k) => {
-      val = val ? val[k] : '';
+      renderCollection(key, container, createCollectionItemHTML);
+      notifyPreview();
     });
-    if (val !== undefined) el.value = val;
   });
 }
 
-if (iframe) {
-  iframe.onload = () => syncPreview();
+/**
+ * Enregistre explicitement dans localStorage
+ */
+function saveConfig() {
+  try {
+    localStorage.setItem('site_config_live', JSON.stringify(currentConfig));
+    notifyPreview();
+    alert('Configuration enregistrée !');
+  } catch (err) {
+    console.error('Erreur lors de la sauvegarde :', err);
+    alert('Impossible de sauvegarder.');
+  }
+}
+
+/**
+ * Réinitialise tout depuis site-config.json
+ */
+async function resetConfig() {
+  if (!confirm('Voulez-vous vraiment réinitialiser toutes vos modifications ?')) return;
+
+  try {
+    localStorage.removeItem('site_config_live');
+    const res = await fetch('../site-config.json');
+    if (!res.ok) throw new Error(`Erreur HTTP : ${res.status}`);
+
+    currentConfig = await res.json();
+    bindStaticInputs();
+    renderAllCollections();
+    notifyPreview();
+    alert('Configuration réinitialisée.');
+  } catch (err) {
+    console.error('Erreur lors de la réinitialisation :', err);
+    alert('Impossible de réinitialiser la configuration.');
+  }
+}
+
+// Expositions globales pour les onclick du HTML
+window.saveConfig = saveConfig;
+window.resetConfig = resetConfig;
+
+// Lecture/écriture dans les objets imbriqués ("site.name")
+function getNestedValue(obj, path) {
+  return path.split('.').reduce((acc, part) => acc && acc[part], obj);
+}
+
+function setNestedValue(obj, path, value) {
+  const parts = path.split('.');
+  let curr = obj;
+  for (let i = 0; i < parts.length - 1; i++) {
+    if (!curr[parts[i]]) curr[parts[i]] = {};
+    curr = curr[parts[i]];
+  }
+  curr[parts[parts.length - 1]] = value;
 }

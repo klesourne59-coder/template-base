@@ -1,74 +1,70 @@
-/* ==========================================================================
-   CUSTOMIZER.CSS - Interface d'administration et prévisualisation en direct
-   ========================================================================== */
+/* customizer/customizer.css — Style complet du panneau d'édition */
 
-/* 1. RESET & VARIABLES
-   ========================================================================== */
-*, *::before, *::after {
+:root {
+  --sidebar-width: 420px;
+  --primary-color: #1e3a8a;
+  --primary-hover: #1e40af;
+  --success-color: #10b981;
+  --success-hover: #059669;
+  --warning-color: #f59e0b;
+  --warning-hover: #d97706;
+  --danger-color: #ef4444;
+  --bg-sidebar: #f8fafc;
+  --bg-card: #ffffff;
+  --border-color: #e2e8f0;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+* {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-:root {
-  --sidebar-width: 420px;
-  --bg-sidebar: #1e293b;
-  --bg-sidebar-card: #0f172a;
-  --bg-input: #334155;
-  --text-primary: #f8fafc;
-  --text-muted: #94a3b8;
-  --border-color: #334155;
-  --accent-primary: #3b82f6;
-  --accent-success: #10b981;
-  --accent-warning: #f59e0b;
-  --accent-danger: #ef4444;
-  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-}
-
 html, body {
   height: 100%;
-  width: 100%;
-  overflow: hidden;
   font-family: var(--font-family);
-  background-color: #020617;
-  color: var(--text-primary);
+  color: var(--text-main);
+  background-color: #0f172a;
+  overflow: hidden;
 }
 
-/* 2. LAYOUT PRINCIPAL (SPLIT SCREEN)
-   ========================================================================== */
+/* --- LAYOUT PRINCIPAL --- */
 .customizer-body {
   display: flex;
   height: 100vh;
   width: 100vw;
-  overflow: hidden;
 }
 
-/* 3. SIDEBAR DE GAUCHE (PANNEAU D'ÉDITION)
-   ========================================================================== */
+/* --- PANNEAU LATÉRAL (GAUCHE) --- */
 .customizer-sidebar {
   width: var(--sidebar-width);
-  min-width: 360px;
-  max-width: 480px;
+  min-width: var(--sidebar-width);
   height: 100%;
   background-color: var(--bg-sidebar);
   border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
   z-index: 10;
-  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.25);
+  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.05);
 }
 
-/* En-tête de la Sidebar */
+/* En-tête fixe avec boutons d'action */
 .customizer-header {
-  padding: 16px 20px;
-  background-color: #0f172a;
+  padding: 16px;
+  background-color: #ffffff;
   border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 20;
 }
 
 .customizer-header h2 {
-  font-size: 1.2rem;
+  font-size: 1.25rem;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--primary-color);
   margin-bottom: 12px;
 }
 
@@ -77,11 +73,51 @@ html, body {
   gap: 8px;
 }
 
-.action-buttons button {
+/* Boutons globaux */
+.action-buttons button,
+.btn-primary,
+.btn-success,
+.btn-warning {
   flex: 1;
+  padding: 8px 12px;
+  font-size: 0.825rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  text-align: center;
 }
 
-/* Zone défilante des contrôles */
+.action-buttons button:active {
+  transform: scale(0.98);
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: #ffffff;
+}
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+}
+
+.btn-success {
+  background-color: var(--success-color);
+  color: #ffffff;
+}
+.btn-success:hover {
+  background-color: var(--success-hover);
+}
+
+.btn-warning {
+  background-color: var(--warning-color);
+  color: #ffffff;
+}
+.btn-warning:hover {
+  background-color: var(--warning-hover);
+}
+
+/* Zone défilante des sections */
 .customizer-sections {
   flex: 1;
   overflow-y: auto;
@@ -91,50 +127,34 @@ html, body {
   gap: 12px;
 }
 
-/* Personnalisation de la barre de défilement */
-.customizer-sections::-webkit-scrollbar {
-  width: 6px;
-}
-.customizer-sections::-webkit-scrollbar-track {
-  background: var(--bg-sidebar);
-}
-.customizer-sections::-webkit-scrollbar-thumb {
-  background: #475569;
-  border-radius: 3px;
-}
-
-/* 4. ACCORDÉONS (DETAILS / SUMMARY)
-   ========================================================================== */
+/* --- ACCORDÉONS (<details>) --- */
 .config-group {
-  background-color: #0f172a;
+  background-color: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: 8px;
   overflow: hidden;
-  transition: border-color 0.2s ease;
-}
-
-.config-group[open] {
-  border-color: var(--accent-primary);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .config-group summary {
-  padding: 14px 16px;
-  font-size: 0.95rem;
+  padding: 12px 16px;
   font-weight: 600;
-  color: #f1f5f9;
+  font-size: 0.95rem;
   cursor: pointer;
+  background-color: #ffffff;
   user-select: none;
-  background-color: #1e293b;
+  color: var(--text-main);
   border-bottom: 1px solid transparent;
   transition: background-color 0.2s ease;
 }
 
 .config-group summary:hover {
-  background-color: #334155;
+  background-color: #f1f5f9;
 }
 
 .config-group[open] summary {
   border-bottom-color: var(--border-color);
+  background-color: #f8fafc;
 }
 
 .group-content {
@@ -144,197 +164,136 @@ html, body {
   gap: 12px;
 }
 
-/* 5. FORMULAIRES & CHAMPS DE SAISIE
-   ========================================================================== */
-label {
-  display: block;
-  font-size: 0.78rem;
+/* --- FORMULAIRES & INPUTS --- */
+.group-content label {
+  font-size: 0.8rem;
   font-weight: 600;
-  color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 4px;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
 }
 
-input[type="text"],
-input[type="email"],
-input[type="number"],
-textarea,
-select {
+.group-content input[type="text"],
+.group-content input[type="email"],
+.group-content input[type="number"],
+.group-content textarea {
   width: 100%;
-  padding: 10px 12px;
-  background-color: var(--bg-input);
+  padding: 8px 12px;
+  font-size: 0.9rem;
   border: 1px solid var(--border-color);
   border-radius: 6px;
-  color: #ffffff;
-  font-size: 0.9rem;
-  font-family: inherit;
-  outline: none;
+  background-color: #ffffff;
+  color: var(--text-main);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-input[type="text"]:focus,
-input[type="email"]:focus,
-input[type="number"]:focus,
-textarea:focus,
-select:focus {
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-}
-
-textarea {
-  resize: vertical;
-  min-height: 70px;
-}
-
-.row-2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-
-/* 6. BOUTONS
-   ========================================================================== */
-button, .btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px 14px;
-  font-size: 0.85rem;
-  font-weight: 600;
+.group-content input[type="color"] {
+  width: 100%;
+  height: 40px;
+  padding: 2px;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
-  border: none;
   cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.1s ease;
+  background-color: #ffffff;
 }
 
-button:active {
-  transform: scale(0.98);
+.group-content input:focus,
+.group-content textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
 }
 
-.btn-primary {
-  background-color: var(--accent-primary);
-  color: #ffffff;
+.group-content textarea {
+  min-height: 80px;
+  resize: vertical;
 }
-.btn-primary:hover { background-color: #2563eb; }
 
-.btn-success {
-  background-color: var(--accent-success);
-  color: #ffffff;
-}
-.btn-success:hover { background-color: #059669; }
-
-.btn-warning {
-  background-color: var(--accent-warning);
-  color: #ffffff;
-}
-.btn-warning:hover { background-color: #d97706; }
-
-.btn-danger {
-  background-color: var(--accent-danger);
-  color: #ffffff;
-}
-.btn-danger:hover { background-color: #dc2626; }
-
-.btn-secondary {
-  background-color: #475569;
-  color: #ffffff;
-}
-.btn-secondary:hover { background-color: #334155; }
-
-/* 7. CARTES DYNAMIQUES (CRUD: Chambres, Restaurant, Services)
-   ========================================================================== */
-.crud-card {
-  background-color: #020617;
+/* --- CARTES DYNAMIQUES (Chambres, Resto, Services) --- */
+.customizer-item-card {
+  background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 12px;
   margin-bottom: 12px;
-}
-
-.crud-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #1e293b;
-}
-
-.crud-header strong {
-  color: #f8fafc;
-  font-size: 0.95rem;
-}
-
-.crud-body {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
-/* Uploader d'images */
-.image-uploader-inline {
-  display: flex;
+.customizer-category-card {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+}
+
+.customizer-category-card h3 {
+  font-size: 1rem;
+  color: var(--primary-color);
+  margin-bottom: 10px;
+}
+
+/* --- SÉLECTEUR VISUEL D'IMAGES --- */
+.image-picker-control {
+  display: inline-flex;
+  flex-direction: column;
   align-items: center;
-  gap: 10px;
-}
-
-.thumb-preview {
-  width: 50px;
-  height: 50px;
-  border-radius: 6px;
-  object-fit: cover;
-  background-color: #334155;
+  background: #ffffff;
+  padding: 6px;
   border: 1px solid var(--border-color);
+  border-radius: 8px;
 }
 
-.thumb-preview.mini {
-  width: 38px;
-  height: 38px;
+.image-preview-wrapper {
+  transition: border-color 0.2s ease;
 }
 
-input[type="file"] {
-  font-size: 0.8rem;
-  color: var(--text-muted);
+.image-preview-wrapper:hover {
+  border-color: var(--primary-color);
 }
 
-/* 8. APERÇU / IFRAME À DROITE
-   ========================================================================== */
+.btn-change, .btn-delete {
+  font-family: var(--font-family);
+  transition: opacity 0.2s ease;
+}
+
+.btn-change:hover, .btn-delete:hover {
+  opacity: 0.9;
+}
+
+/* --- ZONE D'APERÇU EN TEMPS RÉEL (DROITE) --- */
 .customizer-preview {
   flex: 1;
   height: 100%;
-  background-color: #020617;
+  background-color: #1e293b;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 12px;
-  position: relative;
+  padding: 16px;
 }
 
-#preview-frame {
+#preview-iframe {
   width: 100%;
   height: 100%;
+  background-color: #ffffff;
   border: none;
   border-radius: 8px;
-  background-color: #ffffff;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
 }
 
-/* 9. ADAPTATION PETITS ÉCRANS
-   ========================================================================== */
-@media (max-width: 900px) {
-  .customizer-body {
-    flex-direction: column;
-    overflow-y: auto;
-  }
-
-  .customizer-sidebar {
-    width: 100%;
-    max-width: none;
-    height: 50vh;
-  }
-
-  .customizer-preview {
-    height: 50vh;
-  }
+/* Personnalisation de la barre de défilement */
+.customizer-sections::-webkit-scrollbar {
+  width: 6px;
+}
+.customizer-sections::-webkit-scrollbar-track {
+  background: transparent;
+}
+.customizer-sections::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+.customizer-sections::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }

@@ -4,14 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Panneau de Personnalisation</title>
-    <link rel="stylesheet" href="customizer/customizer.css" />
 
-    <!-- Librairies requises pour l'exportation ZIP -->
+    <link rel="stylesheet" href="customizer.css" />
+
+    <!-- Librairies pour l'exportation ZIP -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
-    <!-- Script principal de gestion du customizer -->
-    <script src="customizer/customizer.js" defer></script>
+    <!-- Scripts du Customizer -->
+    <script src="customizer.js" defer></script>
+    <script src="export.js" defer></script>
   </head>
   <body class="customizer-body">
     <!-- PANNEAU D'ÉDITION (GAUCHE) -->
@@ -25,31 +27,80 @@
           <button type="button" onclick="resetConfig()" class="btn-warning">
             Réinitialiser
           </button>
-          <button type="button" onclick="exportSiteZip()" class="btn-primary">
+          <button type="button" id="btn-export" class="btn-primary">
             Exporter (ZIP)
           </button>
         </div>
       </header>
 
       <div class="customizer-sections">
-        <!-- INFORMATIONS GÉNÉRALES -->
+        <!-- IDENTITÉ DU SITE & LOGO -->
         <details open class="config-group">
+          <summary>Identité du Site & Logo</summary>
+          <div class="group-content">
+            <label for="site-name">Nom de l'établissement</label>
+            <input type="text" id="site-name" data-field="site.name" />
+
+            <label
+              for="site-logo-input"
+              style="margin-top: 10px; display: block;"
+              >Logo de l'établissement</label
+            >
+            <input type="file" id="site-logo-input" accept="image/*" />
+            <div id="logo-picker-container"></div>
+          </div>
+        </details>
+
+        <!-- THÈME & COULEURS -->
+        <details class="config-group">
+          <summary>Thème & Couleurs</summary>
+          <div class="group-content">
+            <label for="theme-primary">Couleur principale</label>
+            <input type="color" id="theme-primary" data-field="theme.primary" />
+
+            <label for="theme-secondary">Couleur secondaire</label>
+            <input
+              type="color"
+              id="theme-secondary"
+              data-field="theme.secondary"
+            />
+
+            <label for="theme-accent">Couleur d'accentuation</label>
+            <input type="color" id="theme-accent" data-field="theme.accent" />
+          </div>
+        </details>
+
+        <!-- TYPOGRAPHIE -->
+        <details class="config-group">
+          <summary>Typographie</summary>
+          <div class="group-content">
+            <label for="font-heading">Police des titres</label>
+            <input
+              type="text"
+              id="font-heading"
+              data-field="typography.headingFont"
+              placeholder="ex: Playfair Display, serif"
+            />
+
+            <label for="font-body">Police du texte</label>
+            <input
+              type="text"
+              id="font-body"
+              data-field="typography.bodyFont"
+              placeholder="ex: Montserrat, sans-serif"
+            />
+          </div>
+        </details>
+
+        <!-- EN-TÊTE & ACCUEIL -->
+        <details class="config-group">
           <summary>En-tête & Textes généraux</summary>
           <div class="group-content">
             <label for="hero-title">Titre principal</label>
-            <input
-              type="text"
-              id="hero-title"
-              data-binding="hero.title"
-              oninput="updateField(this)"
-            />
+            <input type="text" id="hero-title" data-field="hero.title" />
 
             <label for="hero-subtitle">Sous-titre / Description</label>
-            <textarea
-              id="hero-subtitle"
-              data-binding="hero.subtitle"
-              oninput="updateField(this)"
-            ></textarea>
+            <textarea id="hero-subtitle" data-field="hero.subtitle"></textarea>
           </div>
         </details>
 
@@ -58,20 +109,10 @@
           <summary>Coordonnées & Contact</summary>
           <div class="group-content">
             <label for="contact-phone">Téléphone</label>
-            <input
-              type="text"
-              id="contact-phone"
-              data-binding="contact.phone"
-              oninput="updateField(this)"
-            />
+            <input type="text" id="contact-phone" data-field="contact.phone" />
 
             <label for="contact-email">Email</label>
-            <input
-              type="email"
-              id="contact-email"
-              data-binding="contact.email"
-              oninput="updateField(this)"
-            />
+            <input type="email" id="contact-email" data-field="contact.email" />
           </div>
         </details>
 
@@ -79,15 +120,15 @@
         <details class="config-group">
           <summary>Chambres & Hébergements</summary>
           <div class="group-content">
-            <div id="rooms-manager-container"></div>
             <button
               type="button"
-              onclick="addRoom()"
-              class="btn-primary"
-              style="width: 100%; margin-top: 10px;"
+              id="btn-add-room"
+              class="btn-secondary"
+              style="margin-bottom: 10px;"
             >
               + Ajouter une chambre
             </button>
+            <div id="rooms-container"></div>
           </div>
         </details>
 
@@ -95,7 +136,15 @@
         <details class="config-group">
           <summary>Carte du Restaurant</summary>
           <div class="group-content">
-            <div id="restaurant-manager-container"></div>
+            <button
+              type="button"
+              id="btn-add-restaurant"
+              class="btn-secondary"
+              style="margin-bottom: 10px;"
+            >
+              + Ajouter un plat
+            </button>
+            <div id="restaurant-container"></div>
           </div>
         </details>
 
@@ -103,7 +152,15 @@
         <details class="config-group">
           <summary>Services & Prestations</summary>
           <div class="group-content">
-            <div id="services-manager-container"></div>
+            <button
+              type="button"
+              id="btn-add-service"
+              class="btn-secondary"
+              style="margin-bottom: 10px;"
+            >
+              + Ajouter un service
+            </button>
+            <div id="services-container"></div>
           </div>
         </details>
       </div>
@@ -112,8 +169,8 @@
     <!-- PRÉVISUALISATION TEMPS RÉEL (DROITE) -->
     <main class="customizer-preview">
       <iframe
-        id="preview-frame"
-        src="index.html"
+        id="preview-iframe"
+        src="../index.html"
         title="Aperçu du site en temps réel"
       ></iframe>
     </main>

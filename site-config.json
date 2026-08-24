@@ -1,97 +1,71 @@
 {
   "site": {
-    "name": "Le Jardin Étoilé",
-    "slogan": "Restaurant & Hôtel d'Exception",
-    "description": "Un havre de paix au cœur de la nature alliant gastronomie raffinée et chambres de luxe.",
-    "logo": "logo.png",
-    "favicon": "favicon.ico",
-    "phone": "+33 1 23 45 67 89",
-    "email": "contact@jardin-etoile.fr",
-    "address": "12 Ruelle du Parc, 75000 Paris",
-    "hours": "Ouvert 7j/7 de 12h à 23h",
-    "socials": {
-      "instagram": "https://instagram.com",
-      "facebook": "https://facebook.com"
-    }
+    "name": "L'Hôtel & Table du Parc",
+    "logo": "https://via.placeholder.com/150x50?text=Logo"
   },
   "theme": {
-    "primary": "#c5a059",
-    "secondary": "#1a1a1a",
-    "accent": "#d4af37",
-    "background": "#ffffff",
-    "card": "#f9f9f9",
-    "text": "#333333",
-    "border": "#e0e0e0",
-    "button": "#c5a059",
-    "buttonText": "#ffffff",
-    "borderRadius": 6,
-    "shadow": "0 4px 12px rgba(0, 0, 0, 0.08)"
+    "primary": "#1e3a8a",
+    "secondary": "#0f172a",
+    "accent": "#f59e0b"
   },
   "typography": {
-    "headingFont": "'Cormorant Garamond', serif",
-    "bodyFont": "'Inter', sans-serif"
+    "headingFont": "Playfair Display, serif",
+    "bodyFont": "Montserrat, sans-serif"
+  },
+  "hero": {
+    "title": "Un séjour d'exception entre nature et élégance",
+    "subtitle": "Découvrez nos chambres raffinées, notre table gastronomique et nos espaces bien-être au cœur d'un domaine verdoyant."
+  },
+  "contact": {
+    "phone": "+33 1 23 45 67 89",
+    "email": "contact@hotelduparc.fr"
   },
   "rooms": [
     {
       "id": "room-1",
-      "name": "Suite Prestige",
-      "description": "Vue panoramique sur le parc, lit King Size, baignoire balnéo et salon privé.",
-      "pricePerNight": 320,
-      "capacity": 2,
-      "surface": 55,
-      "amenities": ["Wi-Fi", "Balcon", "Baignoire", "Mini-bar", "Climatisation"],
-      "images": ["room1-1.jpg", "room1-2.jpg"]
+      "name": "Chambre Deluxe Vue Parc",
+      "price": 180,
+      "description": "Lit king-size, balcon privé offrant une vue imprenable sur le domaine.",
+      "image": "https://via.placeholder.com/600x400?text=Chambre+Deluxe"
     },
     {
       "id": "room-2",
-      "name": "Chambre Deluxe",
-      "description": "Ambiance chaleureuse, douche à l'italienne, espace bureau et terrasse privée.",
-      "pricePerNight": 190,
-      "capacity": 2,
-      "surface": 35,
-      "amenities": ["Wi-Fi", "Terrasse", "Douche italienne", "Machine Espresso"],
-      "images": ["room2-1.jpg"]
+      "name": "Suite Junior Bien-être",
+      "price": 260,
+      "description": "Baignoire balnéo, espace salon privatif et accès direct au spa.",
+      "image": "https://via.placeholder.com/600x400?text=Suite+Junior"
     }
   ],
   "restaurant": [
     {
-      "category": "Entrées",
-      "items": [
-        {
-          "id": "rest-1",
-          "name": "Velouté de potimarron à la truffe",
-          "description": "Émulsion de noisette et éclats de châtaignes torréfiées.",
-          "price": 24,
-          "image": "entrée1.jpg"
-        }
-      ]
+      "id": "resto-1",
+      "name": "Menu Dégustation (5 services)",
+      "price": 85,
+      "description": "Création du chef selon les arrivages du marché et légumes du potager.",
+      "image": "https://via.placeholder.com/600x400?text=Menu+Degustation"
     },
     {
-      "category": "Plats",
-      "items": [
-        {
-          "id": "rest-2",
-          "name": "Filet de bœuf Rossini",
-          "description": "Mousseline de pommes de terre, jus réduit au porto.",
-          "price": 42,
-          "image": "plat1.jpg"
-        }
-      ]
+      "id": "resto-2",
+      "name": "Filet de Bœuf Rôti",
+      "price": 34,
+      "description": "Accompagné de sa mousseline de céleri et réduction de jus truffé.",
+      "image": "https://via.placeholder.com/600x400?text=Filet+de+Boeuf"
     }
   ],
   "services": [
     {
       "id": "serv-1",
-      "name": "Accès Spa & Well-Being",
-      "description": "Accès illimité au sauna, hammam et piscine chauffée.",
+      "name": "Accès Spa & Hammam (2h)",
       "price": 45,
-      "image": "spa.jpg"
+      "description": "Piscine intérieure chauffée, sauna finlandais et tisanerie bio.",
+      "image": "https://via.placeholder.com/600x400?text=Spa+Hammam"
+    },
+    {
+      "id": "serv-2",
+      "name": "Massage Sur-Mesure (1h)",
+      "price": 95,
+      "description": "Soin relaxant ou tonifiant personnalisé aux huiles essentielles.",
+      "image": "https://via.placeholder.com/600x400?text=Massage"
     }
-  ],
-  "settings": {
-    "currency": "EUR",
-    "currencySymbol": "€",
-    "stripePublicKey": "pk_test_sample",
-    "bookingEnabled": true
-  }
+  ]
 }

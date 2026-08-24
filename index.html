@@ -3,49 +3,280 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title data-config="hero.title">Mon Établissement</title>
-    <link rel="stylesheet" href="styles.css" />
+    <title data-config="site.name">Mon Établissement</title>
+
+    <!-- Style CSS embarqué pour l'affichage de la vitrine -->
+    <style>
+      :root {
+        --theme-primary: #1e3a8a;
+        --theme-secondary: #0f172a;
+        --theme-accent: #f59e0b;
+        --font-heading: "Playfair Display", serif;
+        --font-body: "Montserrat", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: var(--font-body);
+        color: var(--theme-secondary);
+        background-color: #ffffff;
+        line-height: 1.6;
+      }
+
+      h1,
+      h2,
+      h3,
+      h4 {
+        font-family: var(--font-heading);
+        color: var(--theme-primary);
+      }
+
+      /* En-tête / Navigation */
+      header {
+        background: #ffffff;
+        border-bottom: 1px solid #e2e8f0;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      nav {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 1rem 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .brand img {
+        max-height: 45px;
+        width: auto;
+        object-fit: contain;
+      }
+
+      .brand-name {
+        font-size: 1.25rem;
+        font-weight: 700;
+      }
+
+      .nav-contact {
+        display: flex;
+        gap: 20px;
+      }
+
+      .nav-contact a {
+        color: var(--theme-secondary);
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 0.95rem;
+      }
+
+      .nav-contact a:hover {
+        color: var(--theme-primary);
+      }
+
+      /* Hero Section */
+      .hero {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        padding: 5rem 2rem;
+        text-align: center;
+      }
+
+      .hero h1 {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .hero p {
+        font-size: 1.15rem;
+        max-width: 700px;
+        margin: 0 auto;
+        color: #475569;
+      }
+
+      /* Sections génériques */
+      .section-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 4rem 2rem;
+      }
+
+      .section-title {
+        text-align: center;
+        font-size: 2rem;
+        margin-bottom: 2.5rem;
+        position: relative;
+      }
+
+      .section-title::after {
+        content: "";
+        display: block;
+        width: 60px;
+        height: 3px;
+        background: var(--theme-accent);
+        margin: 10px auto 0;
+        border-radius: 2px;
+      }
+
+      /* Grilles dynamiques */
+      .cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 2rem;
+      }
+
+      /* Cartes pour les chambres, le restaurant et les services */
+      .card {
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        overflow: hidden;
+        background: #ffffff;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        transition:
+          transform 0.2s ease,
+          box-shadow 0.2s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      }
+
+      .card-media {
+        width: 100%;
+        height: 200px;
+        overflow: hidden;
+        background-color: #f1f5f9;
+      }
+
+      .card-media img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .card-body {
+        padding: 1.25rem;
+      }
+
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 0.75rem;
+      }
+
+      .card-header h3 {
+        font-size: 1.2rem;
+        margin: 0;
+      }
+
+      .price {
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: var(--theme-accent);
+      }
+
+      .description {
+        font-size: 0.95rem;
+        color: #64748b;
+      }
+
+      .empty-msg {
+        text-align: center;
+        color: #94a3b8;
+        grid-column: 1 / -1;
+        font-style: italic;
+      }
+
+      /* Footer */
+      footer {
+        background-color: var(--theme-secondary);
+        color: #ffffff;
+        padding: 3rem 2rem;
+        text-align: center;
+      }
+
+      footer p {
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+      }
+
+      footer a {
+        color: #ffffff;
+        text-decoration: underline;
+      }
+    </style>
+
+    <!-- Script d'injection dynamique (obligatoire à la racine) -->
     <script src="config-loader.js" defer></script>
   </head>
   <body>
-    <!-- EN-TÊTE / HERO -->
-    <header class="hero">
-      <h1 data-config="hero.title">Nom de l'établissement</h1>
-      <p data-config="hero.subtitle">Description de votre établissement</p>
+    <!-- NAVIGATION -->
+    <header>
+      <nav>
+        <div class="brand">
+          <img data-config="site.logo" src="" alt="Logo de l'établissement" />
+          <span class="brand-name" data-config="site.name">Chargement...</span>
+        </div>
+
+        <div class="nav-contact">
+          <a href="tel:" data-config="contact.phone">Téléphone</a>
+          <a href="mailto:" data-config="contact.email">Email</a>
+        </div>
+      </nav>
     </header>
 
-    <main>
-      <!-- SECTION CHAMBRES -->
-      <section id="rooms-section" class="section-container">
-        <h2>Nos Chambres</h2>
-        <div id="rooms-list" class="rooms-grid">
-          <!-- Contenu injecté dynamiquement par config-loader.js -->
-        </div>
-      </section>
+    <!-- HERO SECTION -->
+    <section class="hero">
+      <h1 data-config="hero.title">Bienvenue</h1>
+      <p data-config="hero.subtitle">Découvrez nos prestations d'exception.</p>
+    </section>
 
-      <!-- SECTION RESTAURANT -->
-      <section id="restaurant-section" class="section-container">
-        <h2>Notre Carte Restaurant</h2>
-        <div id="restaurant-menu" class="restaurant-container">
-          <!-- Contenu injecté dynamiquement par config-loader.js -->
-        </div>
-      </section>
+    <!-- SECTION CHAMBRES -->
+    <section id="chambres" class="section-container">
+      <h2 class="section-title">Chambres & Hébergements</h2>
+      <div id="rooms-grid" class="cards-grid">
+        <!-- Injecté dynamiquement par config-loader.js -->
+      </div>
+    </section>
 
-      <!-- SECTION SERVICES -->
-      <section id="services-section" class="section-container">
-        <h2>Nos Services</h2>
-        <div id="services-list" class="services-grid">
-          <!-- Contenu injecté dynamiquement par config-loader.js -->
-        </div>
-      </section>
-    </main>
+    <!-- SECTION RESTAURANT -->
+    <section id="restaurant" class="section-container">
+      <h2 class="section-title">La Carte du Restaurant</h2>
+      <div id="restaurant-grid" class="cards-grid">
+        <!-- Injecté dynamiquement par config-loader.js -->
+      </div>
+    </section>
+
+    <!-- SECTION SERVICES -->
+    <section id="services" class="section-container">
+      <h2 class="section-title">Services & Prestations</h2>
+      <div id="services-grid" class="cards-grid">
+        <!-- Injecté dynamiquement par config-loader.js -->
+      </div>
+    </section>
 
     <!-- PIED DE PAGE -->
     <footer>
       <p>
-        Téléphone :
-        <a href="tel:" data-config="contact.phone">01 02 03 04 05</a> | Email :
-        <a href="mailto:" data-config="contact.email">contact@hotel.com</a>
+        &copy; <span data-config="site.name">Site</span> — Tous droits réservés.
+      </p>
+      <p>
+        Contact : <a href="tel:" data-config="contact.phone">Tél</a> |
+        <a href="mailto:" data-config="contact.email">Email</a>
       </p>
     </footer>
   </body>

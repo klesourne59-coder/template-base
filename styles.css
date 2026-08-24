@@ -1,39 +1,22 @@
 :root {
-  /* Couleurs unifiées */
-  --color-primary: #c5a059;
-  --color-secondary: #1a1a1a;
-  --color-accent: #d4af37;
-  --color-background: #ffffff;
-  --color-card: #f9f9f9;
-  --color-text: #333333;
-  --color-border: #e0e0e0;
-  --color-button: #c5a059;
-  --color-button-text: #ffffff;
+  /* Couleurs */
+  --primary-color: #1b365d;
+  --secondary-color: #c5a059;
+  --accent-color: #d4af37;
+  --bg-color: #f8f9fa;
+  --text-color: #212529;
 
-  /* Formes et Ombres */
-  --radius: 6px;
-  --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-
-  /* Typographies */
-  --font-heading: 'Cormorant Garamond', serif;
-  --font-body: 'Inter', sans-serif;
+  /* Typographie */
+  --font-heading: 'Playfair Display', serif;
+  --font-body: 'Montserrat', sans-serif;
 }
 
-/* Application globale des variables */
 body {
-  background-color: var(--color-background);
-  color: var(--color-text);
   font-family: var(--font-body);
+  color: var(--text-color);
+  background-color: var(--bg-color);
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
-}
-
-.btn-primary, button[type="submit"], .booking-btn {
-  background-color: var(--color-button) !important;
-  color: var(--color-button-text) !important;
-  border-radius: var(--radius) !important;
-  box-shadow: var(--shadow);
-  border: none;
 }

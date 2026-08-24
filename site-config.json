@@ -1,71 +1,60 @@
 {
   "site": {
-    "name": "L'Hôtel & Table du Parc",
-    "logo": "https://via.placeholder.com/150x50?text=Logo"
+    "name": "L'Écrin & Table",
+    "logo": "assets/images/logo.png"
   },
   "theme": {
-    "primary": "#1e3a8a",
-    "secondary": "#0f172a",
-    "accent": "#f59e0b"
+    "primary": "#1b365d",
+    "secondary": "#c5a059",
+    "accent": "#d4af37",
+    "background": "#f8f9fa",
+    "text": "#212529"
   },
   "typography": {
-    "headingFont": "Playfair Display, serif",
-    "bodyFont": "Montserrat, sans-serif"
+    "headingFont": "'Playfair Display', serif",
+    "bodyFont": "'Montserrat', sans-serif"
   },
   "hero": {
-    "title": "Un séjour d'exception entre nature et élégance",
-    "subtitle": "Découvrez nos chambres raffinées, notre table gastronomique et nos espaces bien-être au cœur d'un domaine verdoyant."
+    "title": "Une expérience d'exception",
+    "subtitle": "Hôtel de charme & restaurant gastronomique au cœur de la nature."
   },
   "contact": {
     "phone": "+33 1 23 45 67 89",
-    "email": "contact@hotelduparc.fr"
+    "email": "contact@lecrin-hotel.fr",
+    "address": "12 Route des Cimes, 74000 Annecy"
   },
   "rooms": [
     {
-      "id": "room-1",
-      "name": "Chambre Deluxe Vue Parc",
-      "price": 180,
-      "description": "Lit king-size, balcon privé offrant une vue imprenable sur le domaine.",
-      "image": "https://via.placeholder.com/600x400?text=Chambre+Deluxe"
-    },
-    {
-      "id": "room-2",
-      "name": "Suite Junior Bien-être",
-      "price": 260,
-      "description": "Baignoire balnéo, espace salon privatif et accès direct au spa.",
-      "image": "https://via.placeholder.com/600x400?text=Suite+Junior"
+      "id": "room-deluxe",
+      "name": "Suite Prestige Vue Montagne",
+      "price": 240,
+      "capacity": 2,
+      "surface": 45,
+      "description": "Suite spacieuse avec balcon privé, lit King Size et baignoire balnéo.",
+      "amenities": ["Wi-Fi HD", "Balcon", "Baignoire Balnéo", "Mini-bar", "Climatisation"],
+      "images": [
+        "assets/images/room-1.jpg",
+        "assets/images/room-1-bath.jpg"
+      ]
     }
   ],
   "restaurant": [
     {
-      "id": "resto-1",
-      "name": "Menu Dégustation (5 services)",
-      "price": 85,
-      "description": "Création du chef selon les arrivages du marché et légumes du potager.",
-      "image": "https://via.placeholder.com/600x400?text=Menu+Degustation"
-    },
-    {
-      "id": "resto-2",
-      "name": "Filet de Bœuf Rôti",
-      "price": 34,
-      "description": "Accompagné de sa mousseline de céleri et réduction de jus truffé.",
-      "image": "https://via.placeholder.com/600x400?text=Filet+de+Boeuf"
+      "id": "plat-1",
+      "name": "Filet de Bœuf Simmental",
+      "price": 38,
+      "description": "Jus réduit à la truffe noire, mousseline de céleri et légumes oubliés.",
+      "category": "Plats",
+      "image": "assets/images/plat-1.jpg"
     }
   ],
   "services": [
     {
-      "id": "serv-1",
-      "name": "Accès Spa & Hammam (2h)",
+      "id": "service-spa",
+      "name": "Accès Spa & Bien-être",
       "price": 45,
-      "description": "Piscine intérieure chauffée, sauna finlandais et tisanerie bio.",
-      "image": "https://via.placeholder.com/600x400?text=Spa+Hammam"
-    },
-    {
-      "id": "serv-2",
-      "name": "Massage Sur-Mesure (1h)",
-      "price": 95,
-      "description": "Soin relaxant ou tonifiant personnalisé aux huiles essentielles.",
-      "image": "https://via.placeholder.com/600x400?text=Massage"
+      "description": "Accès illimité au sauna, hammam et piscine chauffée.",
+      "image": "assets/images/spa.jpg"
     }
   ]
 }

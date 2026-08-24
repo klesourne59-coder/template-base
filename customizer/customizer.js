@@ -1,31 +1,25 @@
-// customizer/customizer.js — Code complet et corrigé
+// customizer/customizer.js — Script de personnalisation complet
 
 let currentConfig = {};
 
-// 1. Initialisation globale au chargement de la page
 document.addEventListener('DOMContentLoaded', async () => {
-  await loadInitialConfig();
-  bindStaticInputs();
-  renderAllCollections();
-  setupAddButtons();
-
-  const iframe = document.getElementById('preview-iframe');
-  if (iframe) {
-    iframe.addEventListener('load', () => notifyPreview());
-  }
+  await loadConfig();
+  renderForm();
+  bindGlobalEvents();
+  updatePreview();
 });
 
 /**
- * Charge la configuration depuis localStorage ou ../site-config.json
+ * Charge la configuration depuis le LocalStorage ou site-config.json
  */
-async function loadInitialConfig() {
+async function loadConfig() {
   const localData = localStorage.getItem('site_config_live');
   if (localData) {
     try {
       currentConfig = JSON.parse(localData);
       return;
     } catch (e) {
-      console.warn('LocalStorage invalide, rechargement du fichier d’origine.');
+      console.warn('LocalStorage invalide. Repli sur site-config.json.');
     }
   }
 
@@ -35,247 +29,455 @@ async function loadInitialConfig() {
       currentConfig = await res.json();
     }
   } catch (err) {
-    console.error('Erreur lors du chargement de site-config.json :', err);
+    console.error('Impossible de charger site-config.json :', err);
   }
 }
 
 /**
- * Met à jour le localStorage et envoie la nouvelle config à l'iframe en direct
+ * Sauvegarde la configuration et met à jour l'aperçu dans l'iframe
  */
-function notifyPreview() {
+function saveAndSync() {
   localStorage.setItem('site_config_live', JSON.stringify(currentConfig));
+  updatePreview();
+}
 
-  const iframe = document.getElementById('preview-iframe');
+/**
+ * Transmet la configuration actualisée à l'iframe via postMessage
+ */
+function updatePreview() {
+  const iframe = document.getElementById('preview-iframe') || document.querySelector('iframe');
   if (iframe && iframe.contentWindow) {
-    iframe.contentWindow.postMessage(
-      { type: 'UPDATE_CONFIG', config: currentConfig },
-      '*'
-    );
+    iframe.contentWindow.postMessage({
+      type: 'UPDATE_CONFIG',
+      config: currentConfig
+    }, '*');
   }
 }
 
 /**
- * Lie les champs simples (data-field) et le champ d'import de logo
+ * Génère et remplit l'ensemble des champs du formulaire
  */
-function bindStaticInputs() {
-  document.querySelectorAll('[data-field]').forEach(input => {
-    const path = input.getAttribute('data-field');
-    const value = getNestedValue(currentConfig, path);
-    if (value !== undefined && value !== null) {
-      input.value = value;
-    }
+function renderForm() {
+  // 1. Thème & Couleurs
+  setInputValue('#theme-primary', currentConfig.theme?.primary || '#1b365d');
+  setInputValue('#theme-secondary', currentConfig.theme?.secondary || '#c5a059');
+  setInputValue('#theme-accent', currentConfig.theme?.accent || '#d4af37');
+  setInputValue('#theme-bg', currentConfig.theme?.background || '#f8f9fa');
+  setInputValue('#theme-text', currentConfig.theme?.text || '#212529');
 
-    input.addEventListener('input', (e) => {
-      setNestedValue(currentConfig, path, e.target.value);
-      notifyPreview();
-    });
+  // 2. Typographie
+  setInputValue('#typography-heading', currentConfig.typography?.headingFont || "'Playfair Display', serif");
+  setInputValue('#typography-body', currentConfig.typography?.bodyFont || "'Montserrat', sans-serif");
+
+  // 3. Identité du site & Hero
+  setInputValue('#site-name', currentConfig.site?.name || '');
+  setInputValue('#site-logo-url', currentConfig.site?.logo || '');
+
+  setInputValue('#hero-title', currentConfig.hero?.title || '');
+  setInputValue('#hero-subtitle', currentConfig.hero?.subtitle || '');
+
+  // 4. Contact
+  setInputValue('#contact-phone', currentConfig.contact?.phone || '');
+  setInputValue('#contact-email', currentConfig.contact?.email || '');
+  setInputValue('#contact-address', currentConfig.contact?.address || '');
+
+  // 5. Collections dynamiques
+  renderRoomsEditor();
+  renderRestaurantEditor();
+  renderServicesEditor();
+}
+
+/**
+ * Attache les écouteurs d'événements globaux
+ */
+function bindGlobalEvents() {
+  const form = document.getElementById('customizer-form') || document.body;
+
+  form.addEventListener('input', (e) => {
+    const target = e.target;
+    if (target.dataset.configKey) {
+      updateConfigProperty(target.dataset.configKey, target.value);
+    }
   });
 
-  const logoInput = document.getElementById('site-logo-input');
-  if (logoInput) {
-    logoInput.addEventListener('change', (e) => {
+  // Gestion de l'upload d'image pour le logo du site
+  const logoFileInput = document.getElementById('site-logo-file');
+  if (logoFileInput) {
+    logoFileInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setNestedValue(currentConfig, 'site.logo', event.target.result);
-        notifyPreview();
-      };
-      reader.readAsDataURL(file);
+      if (file) {
+        convertFileToBase64(file, (base64) => {
+          updateConfigProperty('site.logo', base64);
+          setInputValue('#site-logo-url', base64);
+        });
+      }
     });
   }
+
+  // Boutons d'ajout d'éléments
+  document.getElementById('btn-add-room')?.addEventListener('click', addRoom);
+  document.getElementById('btn-add-restaurant')?.addEventListener('click', addRestaurantItem);
+  document.getElementById('btn-add-service')?.addEventListener('click', addService);
+
+  // Rechargement de l'iframe après son chargement initial
+  const iframe = document.getElementById('preview-iframe') || document.querySelector('iframe');
+  if (iframe) {
+    iframe.addEventListener('load', () => updatePreview());
+  }
 }
 
 /**
- * Génère le rendu de toutes les collections (chambres, restaurant, services)
+ * Rendu de la section d'édition des chambres (avec attributs complets)
  */
-function renderAllCollections() {
-  renderCollection('rooms', '#rooms-container', createCollectionItemHTML);
-  renderCollection('restaurant', '#restaurant-container', createCollectionItemHTML);
-  renderCollection('services', '#services-container', createCollectionItemHTML);
-}
-
-/**
- * Rendu dynamique d'une liste
- */
-function renderCollection(key, containerSelector, templateFn) {
-  const container = document.querySelector(containerSelector);
+function renderRoomsEditor() {
+  const container = document.getElementById('rooms-editor-container');
   if (!container) return;
 
-  if (!Array.isArray(currentConfig[key])) {
-    currentConfig[key] = [];
+  if (!Array.isArray(currentConfig.rooms)) {
+    currentConfig.rooms = [];
   }
 
-  container.innerHTML = currentConfig[key].map((item, index) => templateFn(key, item, index)).join('');
-  attachCollectionEvents(key, containerSelector);
+  container.innerHTML = currentConfig.rooms.map((room, index) => {
+    const images = Array.isArray(room.images) ? room.images : (room.image ? [room.image] : []);
+    const amenitiesStr = Array.isArray(room.amenities) ? room.amenities.join(', ') : (room.amenities || '');
+
+    return `
+      <div class="customizer-card" data-room-index="${index}">
+        <div class="card-header">
+          <h4>Chambre #${index + 1} : ${room.name || 'Nouvelle chambre'}</h4>
+          <button type="button" class="btn-danger btn-sm" onclick="removeRoom(${index})">Supprimer</button>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>ID unique :</label>
+            <input type="text" value="${room.id || ''}" onchange="updateRoom(${index}, 'id', this.value)" placeholder="ex: room-deluxe" />
+          </div>
+
+          <div class="form-group">
+            <label>Nom :</label>
+            <input type="text" value="${room.name || ''}" onchange="updateRoom(${index}, 'name', this.value)" />
+          </div>
+
+          <div class="form-group">
+            <label>Prix par nuit (€) :</label>
+            <input type="number" value="${room.price || 0}" onchange="updateRoom(${index}, 'price', parseFloat(this.value) || 0)" />
+          </div>
+
+          <div class="form-group">
+            <label>Capacité (personnes) :</label>
+            <input type="number" value="${room.capacity || 2}" onchange="updateRoom(${index}, 'capacity', parseInt(this.value, 10) || 1)" />
+          </div>
+
+          <div class="form-group">
+            <label>Superficie (m²) :</label>
+            <input type="number" value="${room.surface || ''}" onchange="updateRoom(${index}, 'surface', parseFloat(this.value) || 0)" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Description :</label>
+          <textarea rows="2" onchange="updateRoom(${index}, 'description', this.value)">${room.description || ''}</textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Équipements (séparés par des virgules) :</label>
+          <input type="text" value="${amenitiesStr}" onchange="updateRoomAmenities(${index}, this.value)" placeholder="Wi-Fi, Balcon, Climatisation..." />
+        </div>
+
+        <div class="form-group">
+          <label>Images de la chambre :</label>
+
+          <div class="images-preview-list" id="room-images-${index}">
+            ${images.map((imgSrc, imgIdx) => `
+              <div class="image-thumb-box">
+                <img src="${imgSrc}" class="thumb-img" />
+                <button type="button" class="btn-thumb-remove" onclick="removeRoomImage(${index}, ${imgIdx})">×</button>
+              </div>
+            `).join('')}
+          </div>
+
+          <div class="image-add-controls">
+            <input type="text" placeholder="URL d'image..." id="room-img-url-${index}" />
+            <button type="button" class="btn-secondary btn-sm" onclick="addRoomImageUrl(${index})">Ajouter URL</button>
+            <input type="file" accept="image/*" id="room-img-file-${index}" onchange="handleRoomFileUpload(${index}, this)" style="display:none;" />
+            <button type="button" class="btn-secondary btn-sm" onclick="document.getElementById('room-img-file-${index}').click()">Fichier local</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
 }
 
 /**
- * HTML d'une carte d'élément
+ * Mise à jour d'un champ simple d'une chambre
  */
-function createCollectionItemHTML(key, item, index) {
-  return `
-    <div class="item-card" data-key="${key}" data-index="${index}" style="border: 1px solid #cbd5e1; padding: 1rem; margin-bottom: 1rem; border-radius: 6px; background: #ffffff;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-        <strong>Élément #${index + 1}</strong>
-        <button type="button" class="btn-delete" data-key="${key}" data-index="${index}" style="color: #ef4444; background: none; border: none; cursor: pointer; font-weight: bold;">Supprimer</button>
-      </div>
+window.updateRoom = function(index, field, value) {
+  if (currentConfig.rooms[index]) {
+    currentConfig.rooms[index][field] = value;
+    saveAndSync();
+  }
+};
 
-      <div class="form-group" style="margin-bottom: 0.5rem;">
-        <label style="display: block; font-size: 0.8rem; font-weight: 600;">Nom :</label>
-        <input type="text" class="item-input" data-prop="name" value="${item.name || ''}" style="width: 100%; padding: 0.4rem; border: 1px solid #cbd5e1; border-radius: 4px;" />
-      </div>
+/**
+ * Mise à jour des équipements d'une chambre
+ */
+window.updateRoomAmenities = function(index, value) {
+  if (currentConfig.rooms[index]) {
+    currentConfig.rooms[index].amenities = value
+      .split(',')
+      .map(item => item.trim())
+      .filter(item => item.length > 0);
+    saveAndSync();
+  }
+};
 
-      <div class="form-group" style="margin-bottom: 0.5rem;">
-        <label style="display: block; font-size: 0.8rem; font-weight: 600;">Prix (€) :</label>
-        <input type="number" class="item-input" data-prop="price" value="${item.price ?? ''}" style="width: 100%; padding: 0.4rem; border: 1px solid #cbd5e1; border-radius: 4px;" />
-      </div>
+/**
+ * Ajout d'une URL d'image à une chambre
+ */
+window.addRoomImageUrl = function(index) {
+  const input = document.getElementById(`room-img-url-${index}`);
+  if (!input || !input.value.trim()) return;
 
-      <div class="form-group" style="margin-bottom: 0.5rem;">
-        <label style="display: block; font-size: 0.8rem; font-weight: 600;">Description :</label>
-        <textarea class="item-input" data-prop="description" rows="2" style="width: 100%; padding: 0.4rem; border: 1px solid #cbd5e1; border-radius: 4px;">${item.description || ''}</textarea>
-      </div>
+  if (!Array.isArray(currentConfig.rooms[index].images)) {
+    currentConfig.rooms[index].images = [];
+  }
 
+  currentConfig.rooms[index].images.push(input.value.trim());
+  input.value = '';
+  saveAndSync();
+  renderRoomsEditor();
+};
+
+/**
+ * Ajout d'un fichier image local à une chambre
+ */
+window.handleRoomFileUpload = function(index, fileInput) {
+  const file = fileInput.files[0];
+  if (!file) return;
+
+  convertFileToBase64(file, (base64) => {
+    if (!Array.isArray(currentConfig.rooms[index].images)) {
+      currentConfig.rooms[index].images = [];
+    }
+    currentConfig.rooms[index].images.push(base64);
+    saveAndSync();
+    renderRoomsEditor();
+  });
+};
+
+/**
+ * Suppression d'une image d'une chambre
+ */
+window.removeRoomImage = function(roomIndex, imageIndex) {
+  if (currentConfig.rooms[roomIndex] && Array.isArray(currentConfig.rooms[roomIndex].images)) {
+    currentConfig.rooms[roomIndex].images.splice(imageIndex, 1);
+    saveAndSync();
+    renderRoomsEditor();
+  }
+};
+
+/**
+ * Ajout d'une nouvelle chambre
+ */
+function addRoom() {
+  if (!Array.isArray(currentConfig.rooms)) {
+    currentConfig.rooms = [];
+  }
+
+  const newId = `room-${Date.now()}`;
+  currentConfig.rooms.push({
+    id: newId,
+    name: 'Nouvelle Chambre',
+    price: 150,
+    capacity: 2,
+    surface: 25,
+    description: 'Description de la chambre.',
+    amenities: ['Wi-Fi', 'Climatisation'],
+    images: []
+  });
+
+  saveAndSync();
+  renderRoomsEditor();
+}
+
+/**
+ * Suppression d'une chambre
+ */
+window.removeRoom = function(index) {
+  if (confirm('Voulez-vous vraiment supprimer cette chambre ?')) {
+    currentConfig.rooms.splice(index, 1);
+    saveAndSync();
+    renderRoomsEditor();
+  }
+};
+
+/**
+ * Rendu de l'éditeur pour la carte du restaurant
+ */
+function renderRestaurantEditor() {
+  const container = document.getElementById('restaurant-editor-container');
+  if (!container) return;
+
+  if (!Array.isArray(currentConfig.restaurant)) {
+    currentConfig.restaurant = [];
+  }
+
+  container.innerHTML = currentConfig.restaurant.map((item, index) => `
+    <div class="customizer-card" data-restaurant-index="${index}">
+      <div class="card-header">
+        <h4>Plat #${index + 1} : ${item.name || 'Nouveau plat'}</h4>
+        <button type="button" class="btn-danger btn-sm" onclick="removeRestaurantItem(${index})">Supprimer</button>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Nom :</label>
+          <input type="text" value="${item.name || ''}" onchange="updateRestaurantItem(${index}, 'name', this.value)" />
+        </div>
+        <div class="form-group">
+          <label>Prix (€) :</label>
+          <input type="number" value="${item.price || 0}" onchange="updateRestaurantItem(${index}, 'price', parseFloat(this.value) || 0)" />
+        </div>
+        <div class="form-group">
+          <label>Catégorie :</label>
+          <input type="text" value="${item.category || ''}" onchange="updateRestaurantItem(${index}, 'category', this.value)" placeholder="Entrées, Plats, Desserts..." />
+        </div>
+        <div class="form-group">
+          <label>Image (URL) :</label>
+          <input type="text" value="${item.image || ''}" onchange="updateRestaurantItem(${index}, 'image', this.value)" />
+        </div>
+      </div>
       <div class="form-group">
-        <label style="display: block; font-size: 0.8rem; font-weight: 600;">Image :</label>
-        <input type="file" class="item-file" data-key="${key}" data-index="${index}" accept="image/*" style="font-size: 0.8rem;" />
-        ${item.image ? `<img src="${item.image}" alt="Aperçu" style="max-height: 50px; display: block; margin-top: 5px; border-radius: 4px;" />` : ''}
+        <label>Description :</label>
+        <textarea rows="2" onchange="updateRestaurantItem(${index}, 'description', this.value)">${item.description || ''}</textarea>
       </div>
     </div>
-  `;
+  `).join('');
 }
 
+window.updateRestaurantItem = function(index, field, value) {
+  if (currentConfig.restaurant[index]) {
+    currentConfig.restaurant[index][field] = value;
+    saveAndSync();
+  }
+};
+
+function addRestaurantItem() {
+  if (!Array.isArray(currentConfig.restaurant)) currentConfig.restaurant = [];
+  currentConfig.restaurant.push({
+    id: `plat-${Date.now()}`,
+    name: 'Nouveau Plat',
+    price: 25,
+    category: 'Plats',
+    description: 'Description du plat.',
+    image: ''
+  });
+  saveAndSync();
+  renderRestaurantEditor();
+}
+
+window.removeRestaurantItem = function(index) {
+  currentConfig.restaurant.splice(index, 1);
+  saveAndSync();
+  renderRestaurantEditor();
+};
+
 /**
- * Attache la saisie, l'upload d'image et la suppression sur les éléments
+ * Rendu de l'éditeur pour les services
  */
-function attachCollectionEvents(key, containerSelector) {
-  const container = document.querySelector(containerSelector);
+function renderServicesEditor() {
+  const container = document.getElementById('services-editor-container');
   if (!container) return;
 
-  container.querySelectorAll('.item-input').forEach(input => {
-    input.addEventListener('input', (e) => {
-      const card = e.target.closest('.item-card');
-      const index = parseInt(card.dataset.index, 10);
-      const prop = e.target.dataset.prop;
-      const value = e.target.type === 'number' ? parseFloat(e.target.value) || 0 : e.target.value;
+  if (!Array.isArray(currentConfig.services)) {
+    currentConfig.services = [];
+  }
 
-      currentConfig[key][index][prop] = value;
-      notifyPreview();
-    });
+  container.innerHTML = currentConfig.services.map((service, index) => `
+    <div class="customizer-card" data-service-index="${index}">
+      <div class="card-header">
+        <h4>Service #${index + 1} : ${service.name || 'Nouveau service'}</h4>
+        <button type="button" class="btn-danger btn-sm" onclick="removeService(${index})">Supprimer</button>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Nom :</label>
+          <input type="text" value="${service.name || ''}" onchange="updateService(${index}, 'name', this.value)" />
+        </div>
+        <div class="form-group">
+          <label>Prix (€) :</label>
+          <input type="number" value="${service.price || 0}" onchange="updateService(${index}, 'price', parseFloat(this.value) || 0)" />
+        </div>
+        <div class="form-group">
+          <label>Image (URL) :</label>
+          <input type="text" value="${service.image || ''}" onchange="updateService(${index}, 'image', this.value)" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Description :</label>
+        <textarea rows="2" onchange="updateService(${index}, 'description', this.value)">${service.description || ''}</textarea>
+      </div>
+    </div>
+  `).join('');
+}
+
+window.updateService = function(index, field, value) {
+  if (currentConfig.services[index]) {
+    currentConfig.services[index][field] = value;
+    saveAndSync();
+  }
+};
+
+function addService() {
+  if (!Array.isArray(currentConfig.services)) currentConfig.services = [];
+  currentConfig.services.push({
+    id: `service-${Date.now()}`,
+    name: 'Nouveau Service',
+    price: 30,
+    description: 'Description du service.',
+    image: ''
   });
+  saveAndSync();
+  renderServicesEditor();
+}
 
-  container.querySelectorAll('.item-file').forEach(fileInput => {
-    fileInput.addEventListener('change', (e) => {
-      const index = parseInt(e.target.dataset.index, 10);
-      const file = e.target.files[0];
-      if (!file) return;
+window.removeService = function(index) {
+  currentConfig.services.splice(index, 1);
+  saveAndSync();
+  renderServicesEditor();
+};
 
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        currentConfig[key][index].image = event.target.result;
-        renderCollection(key, containerSelector, createCollectionItemHTML);
-        notifyPreview();
-      };
-      reader.readAsDataURL(file);
-    });
-  });
+/**
+ * Met à jour une propriété imbriquée à partir d'une clé sous forme "objet.propriete"
+ */
+function updateConfigProperty(path, value) {
+  const keys = path.split('.');
+  let current = currentConfig;
 
-  container.querySelectorAll('.btn-delete').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const index = parseInt(btn.dataset.index, 10);
-      currentConfig[key].splice(index, 1);
-      renderCollection(key, containerSelector, createCollectionItemHTML);
-      notifyPreview();
-    });
-  });
+  for (let i = 0; i < keys.length - 1; i++) {
+    if (!current[keys[i]]) {
+      current[keys[i]] = {};
+    }
+    current = current[keys[i]];
+  }
+
+  current[keys[keys.length - 1]] = value;
+  saveAndSync();
 }
 
 /**
- * Configure les boutons d'ajout
+ * Helper d'assignation de valeur d'input
  */
-function setupAddButtons() {
-  const mappings = [
-    { btnId: 'btn-add-room', key: 'rooms', container: '#rooms-container' },
-    { btnId: 'btn-add-restaurant', key: 'restaurant', container: '#restaurant-container' },
-    { btnId: 'btn-add-service', key: 'services', container: '#services-container' }
-  ];
-
-  mappings.forEach(({ btnId, key, container }) => {
-    const btn = document.getElementById(btnId);
-    if (!btn) return;
-
-    btn.addEventListener('click', () => {
-      if (!Array.isArray(currentConfig[key])) {
-        currentConfig[key] = [];
-      }
-
-      const label = key === 'rooms' ? 'hébergement' : key === 'restaurant' ? 'plat' : 'service';
-      currentConfig[key].push({
-        id: `${key}-${Date.now()}`,
-        name: `Nouveau ${label}`,
-        price: 0,
-        description: '',
-        image: ''
-      });
-
-      renderCollection(key, container, createCollectionItemHTML);
-      notifyPreview();
-    });
-  });
+function setInputValue(selector, value) {
+  const input = document.querySelector(selector);
+  if (input) input.value = value;
 }
 
 /**
- * Enregistre explicitement dans localStorage
+ * Utilitaire de conversion d'un fichier en Base64
  */
-function saveConfig() {
-  try {
-    localStorage.setItem('site_config_live', JSON.stringify(currentConfig));
-    notifyPreview();
-    alert('Configuration enregistrée !');
-  } catch (err) {
-    console.error('Erreur lors de la sauvegarde :', err);
-    alert('Impossible de sauvegarder.');
-  }
-}
-
-/**
- * Réinitialise tout depuis site-config.json
- */
-async function resetConfig() {
-  if (!confirm('Voulez-vous vraiment réinitialiser toutes vos modifications ?')) return;
-
-  try {
-    localStorage.removeItem('site_config_live');
-    const res = await fetch('../site-config.json');
-    if (!res.ok) throw new Error(`Erreur HTTP : ${res.status}`);
-
-    currentConfig = await res.json();
-    bindStaticInputs();
-    renderAllCollections();
-    notifyPreview();
-    alert('Configuration réinitialisée.');
-  } catch (err) {
-    console.error('Erreur lors de la réinitialisation :', err);
-    alert('Impossible de réinitialiser la configuration.');
-  }
-}
-
-// Expositions globales pour les onclick du HTML
-window.saveConfig = saveConfig;
-window.resetConfig = resetConfig;
-
-// Lecture/écriture dans les objets imbriqués ("site.name")
-function getNestedValue(obj, path) {
-  return path.split('.').reduce((acc, part) => acc && acc[part], obj);
-}
-
-function setNestedValue(obj, path, value) {
-  const parts = path.split('.');
-  let curr = obj;
-  for (let i = 0; i < parts.length - 1; i++) {
-    if (!curr[parts[i]]) curr[parts[i]] = {};
-    curr = curr[parts[i]];
-  }
-  curr[parts[parts.length - 1]] = value;
+function convertFileToBase64(file, callback) {
+  const reader = new FileReader();
+  reader.onload = (e) => callback(e.target.result);
+  reader.readAsDataURL(file);
 }

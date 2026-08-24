@@ -1,252 +1,174 @@
-document.addEventListener("DOMContentLoaded", () => {
+// scripts.js — Engine de réservation & calcul dynamique de séjour
 
-  /* ============================================================
-     1. NAVIGATION MOBILE (menu hamburger)
-     ============================================================ */
-  const navToggle = document.querySelector(".nav-toggle");
-  const navList = document.querySelector(".nav-list");
-  if (navToggle && navList) {
-    navToggle.addEventListener("click", () => {
-      const isOpen = navList.classList.toggle("open");
-      navToggle.setAttribute("aria-expanded", String(isOpen));
-    });
-    // Ferme le menu mobile après un clic sur un lien
-    navList.querySelectorAll("a").forEach((link) => {
-      link.addEventListener("click", () => {
-        navList.classList.remove("open");
-        navToggle.setAttribute("aria-expanded", "false");
-      });
-    });
+document.addEventListener('DOMContentLoaded', () => {
+  initReservationEngine();
+});
+
+// Recalcule si la configuration dynamique est appliquée ou mise à jour
+document.addEventListener('siteConfigApplied', () => {
+  calculateTotal();
+});
+
+/**
+ * Initialise les écouteurs du formulaire de réservation
+ */
+function initReservationEngine() {
+  const roomSelect = document.querySelector('select#room-select, select[name="room"]');
+  const checkinInput = document.querySelector('#checkin, input[name="checkin"]');
+  const checkoutInput = document.querySelector('#checkout, input[name="checkout"]');
+  const guestsInput = document.querySelector('#guests, select[name="guests"]');
+  const optionInputs = document.querySelectorAll('.reservation-option, input[type="checkbox"][data-price]');
+  const form = document.querySelector('#reservation-form, form.booking-form');
+
+  if (!roomSelect && !form) return;
+
+  // Définition de la date minimale à aujourd'hui
+  const today = new Date().toISOString().split('T')[0];
+  if (checkinInput && !checkinInput.value) {
+    checkinInput.min = today;
   }
 
-  /* ============================================================
-     2. FILTRES DE LA GALERIE
-     ============================================================ */
-  const filterBtns = document.querySelectorAll(".filter-btn");
-  const galleryItems = document.querySelectorAll(".gallery-item");
-  if (filterBtns.length > 0) {
-    filterBtns.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        filterBtns.forEach((b) => b.classList.remove("active"));
-        btn.classList.add("active");
-        const filter = btn.getAttribute("data-filter");
-        galleryItems.forEach((item) => {
-          const match = filter === "all" || item.getAttribute("data-category") === filter;
-          item.style.display = match ? "" : "none";
-        });
+  // Écoute de tous les champs impactant le prix ou la durée
+  const inputsToListen = [roomSelect, checkinInput, checkoutInput, guestsInput, ...optionInputs];
+  inputsToListen.forEach(input => {
+    if (input) {
+      input.addEventListener('change', () => {
+        if (input === checkinInput && checkinInput.value) {
+          // Ajuste le check-out minimum au lendemain
+          const minCheckout = new Date(checkinInput.value);
+          minCheckout.setDate(minCheckout.getDate() + 1);
+          const minCheckoutStr = minCheckout.toISOString().split('T')[0];
+          if (checkoutInput) {
+            checkoutInput.min = minCheckoutStr;
+            if (!checkoutInput.value || checkoutInput.value <= checkinInput.value) {
+              checkoutInput.value = minCheckoutStr;
+            }
+          }
+        }
+        calculateTotal();
       });
-    });
-  }
-
-  /* ============================================================
-     3. LIGHTBOX & CARROUSEL (agrandissement et défilement photo)
-     ============================================================ */
-  const modal = document.getElementById("lightbox-modal");
-  const modalImg = document.getElementById("lightbox-img");
-  const closeBtn = document.querySelector(".lightbox-close");
-
-  let currentGalleryImages = [];
-  let currentImageIndex = 0;
-
-  function showLightboxImage() {
-    if (modalImg && currentGalleryImages.length > 0) {
-      modalImg.src = currentGalleryImages[currentImageIndex];
     }
-  }
-
-  // Ouverture de la lightbox au clic sur une photo
-  document.querySelectorAll(".gallery-item, .gallery-card, .lightbox-trigger").forEach((item) => {
-    item.addEventListener("click", () => {
-      if (!modal || !modalImg) return;
-
-      // Récupère la liste dans data-images si présente, sinon prend la photo cliquée
-      const rawImages = item.getAttribute("data-images");
-      if (rawImages) {
-        currentGalleryImages = rawImages.split(",").map((img) => img.trim());
-      } else {
-        const singleImg = item.tagName === "IMG" ? item.src : item.querySelector("img")?.src;
-        currentGalleryImages = singleImg ? [singleImg] : [];
-      }
-
-      currentImageIndex = 0;
-      showLightboxImage();
-      modal.classList.add("open");
-    });
   });
 
-  // Bouton Précédent
-  const prevBtn = document.querySelector(".lightbox-prev");
-  if (prevBtn) {
-    prevBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      if (currentGalleryImages.length > 0) {
-        currentImageIndex = (currentImageIndex - 1 + currentGalleryImages.length) % currentGalleryImages.length;
-        showLightboxImage();
-      }
-    });
-  }
-
-  // Bouton Suivant
-  const nextBtn = document.querySelector(".lightbox-next");
-  if (nextBtn) {
-    nextBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      if (currentGalleryImages.length > 0) {
-        currentImageIndex = (currentImageIndex + 1) % currentGalleryImages.length;
-        showLightboxImage();
-      }
-    });
-  }
-
-  // Fermeture UNIQUEMENT sur le bouton Croix (✕)
-  if (closeBtn && modal) {
-    closeBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      modal.classList.remove("open");
-    });
-  }
-
-  // Fermeture avec la touche Échap
-  if (modal) {
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") modal.classList.remove("open");
-    });
-  }
-
-  /* ============================================================
-     4. RÉSERVATION — calcul du tarif + paiement Stripe réel
-     ============================================================ */
-  const ROOMS = {
-    "simple":          { label: "Chambre Simple",          price: 16000 },
-    "double":          { label: "Chambre Double",          price: 23000 },
-    "familiale":       { label: "Chambre Familiale",       price: 31000 },
-    "suite-prestige":  { label: "Suite Prestige",          price: 42000 },
-    "suite-familiale": { label: "Suite Familiale",         price: 54000 },
-    "suite-royale":    { label: "Suite Royale Étoilée",    price: 75000 },
-  };
-  const MINIBAR_PRICE = 2500;
-  const SPA_PRICE = 9000;
-
-  const form = document.getElementById("reservation-form");
+  // Gestion de la soumission du formulaire
   if (form) {
-    const roomSelect = document.getElementById("service-type");
-    const checkinInput = document.getElementById("checkin");
-    const checkoutInput = document.getElementById("checkout");
-    const guestsInput = document.getElementById("guests");
-    const minibarCheck = document.getElementById("opt-minibar");
-    const spaCheck = document.getElementById("opt-spa");
-    const summaryEl = document.getElementById("price-summary");
-    const errorEl = document.getElementById("reservation-error");
-    const submitBtn = form.querySelector("button[type='submit']");
-
-    const formatEuros = (cents) =>
-      (cents / 100).toLocaleString("fr-FR", { minimumFractionDigits: 2 }) + " €";
-
-    function nightsBetween() {
-      if (!checkinInput.value || !checkoutInput.value) return 0;
-      const start = new Date(checkinInput.value);
-      const end = new Date(checkoutInput.value);
-      const diff = Math.round((end - start) / (1000 * 60 * 60 * 24));
-      return diff > 0 ? diff : 0;
-    }
-
-    function updateSummary() {
-      if (!summaryEl) return;
-      const room = ROOMS[roomSelect.value];
-      const nights = nightsBetween();
-      const guests = parseInt(guestsInput.value, 10) || 1;
-
-      if (!room || nights <= 0) {
-        summaryEl.textContent = "Sélectionnez une chambre et des dates valides pour voir le tarif estimé.";
-        return;
-      }
-
-      let total = room.price * nights;
-      const lines = [
-        `${room.label} × ${nights} nuit${nights > 1 ? "s" : ""} — ${formatEuros(room.price * nights)}`
-      ];
-
-      if (minibarCheck && minibarCheck.checked) {
-        total += MINIBAR_PRICE * nights;
-        lines.push(`Minibar Premium × ${nights} nuit${nights > 1 ? "s" : ""} — ${formatEuros(MINIBAR_PRICE * nights)}`);
-      }
-      if (spaCheck && spaCheck.checked) {
-        total += SPA_PRICE * guests;
-        lines.push(`Accès Spa × ${guests} pers. — ${formatEuros(SPA_PRICE * guests)}`);
-      }
-
-      lines.push(`<strong>Total estimé — ${formatEuros(total)}</strong>`);
-      summaryEl.innerHTML = lines.join("<br>");
-    }
-
-    [roomSelect, checkinInput, checkoutInput, guestsInput, minibarCheck, spaCheck]
-      .filter(Boolean)
-      .forEach((el) => el.addEventListener("input", updateSummary));
-    updateSummary();
-
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      if (errorEl) {
-        errorEl.classList.remove("visible");
-        errorEl.textContent = "";
-      }
-
-      const roomType = roomSelect.value;
-      const dateStart = checkinInput.value;
-      const dateEnd = checkoutInput.value;
-      const guests = parseInt(guestsInput.value, 10) || 1;
-      const name = document.getElementById("res-name").value;
-      const email = document.getElementById("res-email").value;
-
-      if (!roomType || !dateStart || !dateEnd || nightsBetween() <= 0) {
-        if (errorEl) {
-          errorEl.textContent = "Merci de vérifier vos dates : le départ doit être après l'arrivée.";
-          errorEl.classList.add("visible");
-        }
-        return;
-      }
-
-      const payload = {
-        roomType,
-        dateStart,
-        dateEnd,
-        guests,
-        name,
-        email,
-        options: {
-          minibar: !!(minibarCheck && minibarCheck.checked),
-          spa: !!(spaCheck && spaCheck.checked),
-        },
-      };
-
-      const originalLabel = submitBtn.textContent;
-      submitBtn.disabled = true;
-      submitBtn.textContent = "Redirection vers le paiement sécurisé…";
-
-      try {
-        const res = await fetch("/api/create-checkout-session", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-
-        if (!res.ok) throw new Error("La session de paiement n'a pas pu être créée.");
-
-        const data = await res.json();
-        if (data.url) {
-          window.location.href = data.url;
-        } else {
-          throw new Error("Réponse inattendue du serveur de paiement.");
-        }
-      } catch (err) {
-        if (errorEl) {
-          errorEl.textContent = "Une erreur est survenue lors de la préparation du paiement. Merci de réessayer dans un instant, ou de nous contacter directement.";
-          errorEl.classList.add("visible");
-        }
-        submitBtn.disabled = false;
-        submitBtn.textContent = originalLabel;
-      }
-    });
+    form.addEventListener('submit', handleReservationSubmit);
   }
 
-});
+  // Premier calcul au chargement
+  calculateTotal();
+}
+
+/**
+ * Calcule dynamiquement le tarif total à partir des données de site-config.json
+ */
+function calculateTotal() {
+  const roomSelect = document.querySelector('select#room-select, select[name="room"]');
+  const checkinInput = document.querySelector('#checkin, input[name="checkin"]');
+  const checkoutInput = document.querySelector('#checkout, input[name="checkout"]');
+  const optionInputs = document.querySelectorAll('.reservation-option:checked, input[type="checkbox"][data-price]:checked');
+
+  // Éléments de synthèse dans l'interface
+  const nightsEl = document.querySelector('#summary-nights, [data-summary="nights"]');
+  const roomPriceEl = document.querySelector('#summary-room-price, [data-summary="room-price"]');
+  const totalEl = document.querySelector('#summary-total, [data-summary="total"]');
+  const submitBtn = document.querySelector('#btn-submit-booking, form button[type="submit"]');
+
+  if (!roomSelect) return null;
+
+  // 1. Récupération du prix de la chambre depuis siteConfig ou data-price
+  const selectedValue = roomSelect.value;
+  let roomPrice = 0;
+  let roomData = null;
+
+  if (window.siteConfig && Array.isArray(window.siteConfig.rooms)) {
+    roomData = window.siteConfig.rooms.find(r => r.id === selectedValue || r.name === selectedValue);
+    if (roomData) {
+      roomPrice = parseFloat(roomData.price) || 0;
+    }
+  }
+
+  // Fallback sur le dataset de l'option <option data-price="...">
+  if (!roomPrice && roomSelect.selectedIndex >= 0) {
+    const selectedOption = roomSelect.options[roomSelect.selectedIndex];
+    roomPrice = parseFloat(selectedOption?.dataset?.price) || 0;
+  }
+
+  // 2. Calcul du nombre de nuits
+  let nights = 0;
+  if (checkinInput && checkoutInput && checkinInput.value && checkoutInput.value) {
+    const d1 = new Date(checkinInput.value);
+    const d2 = new Date(checkoutInput.value);
+    const diffTime = d2.getTime() - d1.getTime();
+    if (diffTime > 0) {
+      nights = Math.ceil(diffTime / (1000 * 3600 * 24));
+    }
+  }
+
+  // 3. Calcul des options supplémentaires (ex: petit-déjeuner, spa)
+  let optionsTotal = 0;
+  optionInputs.forEach(opt => {
+    const optPrice = parseFloat(opt.dataset.price) || 0;
+    const optPerNight = opt.dataset.perNight === 'true';
+    optionsTotal += optPerNight ? (optPrice * (nights || 1)) : optPrice;
+  });
+
+  // 4. Montant global
+  const roomTotal = roomPrice * nights;
+  const grandTotal = roomTotal + optionsTotal;
+
+  // 5. Mise à jour du DOM
+  if (nightsEl) nightsEl.textContent = `${nights} nuit${nights > 1 ? 's' : ''}`;
+  if (roomPriceEl) roomPriceEl.textContent = `${roomPrice} €`;
+  if (totalEl) totalEl.textContent = `${grandTotal.toFixed(2)} €`;
+
+  if (submitBtn) {
+    submitBtn.disabled = !(selectedValue && nights > 0);
+  }
+
+  return {
+    roomData,
+    roomPrice,
+    nights,
+    optionsTotal,
+    grandTotal
+  };
+}
+
+/**
+ * Enregistre la réservation et redirige vers le paiement / confirmation
+ */
+function handleReservationSubmit(e) {
+  e.preventDefault();
+
+  const calculation = calculateTotal();
+  if (!calculation || calculation.nights <= 0) {
+    alert('Veuillez sélectionner une chambre et des dates valides.');
+    return;
+  }
+
+  const form = e.target;
+  const formData = new FormData(form);
+
+  const reservationSummary = {
+    roomId: calculation.roomData?.id || formData.get('room'),
+    roomName: calculation.roomData?.name || 'Chambre',
+    roomPrice: calculation.roomPrice,
+    checkin: formData.get('checkin'),
+    checkout: formData.get('checkout'),
+    nights: calculation.nights,
+    guests: formData.get('guests') || 1,
+    optionsTotal: calculation.optionsTotal,
+    total: calculation.grandTotal,
+    timestamp: new Date().toISOString()
+  };
+
+  // Stockage pour le récapitulatif / module de paiement
+  localStorage.setItem('current_reservation', JSON.stringify(reservationSummary));
+
+  if (form.dataset.nextStep) {
+    window.location.href = form.dataset.nextStep;
+  } else {
+    alert(`Réservation confirmée pour ${calculation.roomData?.name || 'votre chambre'} !\nTotal : ${calculation.grandTotal.toFixed(2)} € pour ${calculation.nights} nuit(s).`);
+  }
+}

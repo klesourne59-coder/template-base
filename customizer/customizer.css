@@ -1,20 +1,22 @@
-/* customizer/customizer.css — Style complet du panneau d'édition */
+/* customizer/customizer.css — Interface d'édition professionnelle */
 
 :root {
-  --sidebar-width: 420px;
-  --primary-color: #1e3a8a;
-  --primary-hover: #1e40af;
-  --success-color: #10b981;
-  --success-hover: #059669;
-  --warning-color: #f59e0b;
-  --warning-hover: #d97706;
-  --danger-color: #ef4444;
-  --bg-sidebar: #f8fafc;
-  --bg-card: #ffffff;
-  --border-color: #e2e8f0;
-  --text-main: #0f172a;
-  --text-muted: #64748b;
-  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --cust-bg-sidebar: #f8fafc;
+  --cust-bg-card: #ffffff;
+  --cust-border: #e2e8f0;
+  --cust-border-hover: #cbd5e1;
+  --cust-text: #0f172a;
+  --cust-text-muted: #64748b;
+  --cust-primary: #2563eb;
+  --cust-primary-hover: #1d4ed8;
+  --cust-success: #16a34a;
+  --cust-success-hover: #15803d;
+  --cust-warning: #d97706;
+  --cust-warning-hover: #b45309;
+  --cust-danger: #dc2626;
+  --cust-danger-hover: #b91c1c;
+  --cust-radius: 8px;
+  --cust-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 * {
@@ -23,277 +25,322 @@
   padding: 0;
 }
 
-html, body {
+html, body.customizer-body {
   height: 100%;
-  font-family: var(--font-family);
-  color: var(--text-main);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  color: var(--cust-text);
   background-color: #0f172a;
   overflow: hidden;
 }
 
-/* --- LAYOUT PRINCIPAL --- */
-.customizer-body {
+body.customizer-body {
   display: flex;
-  height: 100vh;
   width: 100vw;
+  height: 100vh;
 }
 
-/* --- PANNEAU LATÉRAL (GAUCHE) --- */
+/* --- SIDEBAR D'ÉDITION (GAUCHE) --- */
 .customizer-sidebar {
-  width: var(--sidebar-width);
-  min-width: var(--sidebar-width);
-  height: 100%;
-  background-color: var(--bg-sidebar);
-  border-right: 1px solid var(--border-color);
+  width: 440px;
+  min-width: 380px;
+  height: 100vh;
+  background-color: var(--cust-bg-sidebar);
+  border-right: 1px solid var(--cust-border);
   display: flex;
   flex-direction: column;
   z-index: 10;
   box-shadow: 4px 0 12px rgba(0, 0, 0, 0.05);
 }
 
-/* En-tête fixe avec boutons d'action */
 .customizer-header {
-  padding: 16px;
+  padding: 1rem 1.25rem;
   background-color: #ffffff;
-  border-bottom: 1px solid var(--border-color);
-  position: sticky;
-  top: 0;
-  z-index: 20;
+  border-bottom: 1px solid var(--cust-border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
 .customizer-header h2 {
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   font-weight: 700;
-  color: var(--primary-color);
-  margin-bottom: 12px;
+  color: var(--cust-text);
 }
 
 .action-buttons {
   display: flex;
-  gap: 8px;
+  gap: 0.5rem;
 }
 
-/* Boutons globaux */
-.action-buttons button,
-.btn-primary,
-.btn-success,
-.btn-warning {
-  flex: 1;
-  padding: 8px 12px;
-  font-size: 0.825rem;
-  font-weight: 600;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.1s ease;
-  text-align: center;
-}
-
-.action-buttons button:active {
-  transform: scale(0.98);
-}
-
-.btn-primary {
-  background-color: var(--primary-color);
-  color: #ffffff;
-}
-.btn-primary:hover {
-  background-color: var(--primary-hover);
-}
-
-.btn-success {
-  background-color: var(--success-color);
-  color: #ffffff;
-}
-.btn-success:hover {
-  background-color: var(--success-hover);
-}
-
-.btn-warning {
-  background-color: var(--warning-color);
-  color: #ffffff;
-}
-.btn-warning:hover {
-  background-color: var(--warning-hover);
-}
-
-/* Zone défilante des sections */
 .customizer-sections {
   flex: 1;
   overflow-y: auto;
-  padding: 16px;
+  padding: 1.25rem;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 0.85rem;
 }
 
-/* --- ACCORDÉONS (<details>) --- */
+/* --- SECTIONS ACCORDÉONS --- */
 .config-group {
-  background-color: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
+  background: var(--cust-bg-card);
+  border: 1px solid var(--cust-border);
+  border-radius: var(--cust-radius);
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--cust-shadow);
+  transition: border-color 0.2s ease;
+}
+
+.config-group:hover {
+  border-color: var(--cust-border-hover);
 }
 
 .config-group summary {
-  padding: 12px 16px;
+  padding: 0.85rem 1rem;
   font-weight: 600;
-  font-size: 0.95rem;
   cursor: pointer;
-  background-color: #ffffff;
   user-select: none;
-  color: var(--text-main);
-  border-bottom: 1px solid transparent;
-  transition: background-color 0.2s ease;
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--cust-text);
+  list-style: none;
 }
 
-.config-group summary:hover {
-  background-color: #f1f5f9;
+.config-group summary::-webkit-details-marker {
+  display: none;
+}
+
+.config-group summary::after {
+  content: "›";
+  font-size: 1.2rem;
+  transition: transform 0.2s ease;
+  color: var(--cust-text-muted);
+}
+
+.config-group[open] summary::after {
+  transform: rotate(90deg);
 }
 
 .config-group[open] summary {
-  border-bottom-color: var(--border-color);
+  border-bottom: 1px solid var(--cust-border);
   background-color: #f8fafc;
 }
 
 .group-content {
-  padding: 16px;
+  padding: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 0.85rem;
 }
 
-/* --- FORMULAIRES & INPUTS --- */
-.group-content label {
-  font-size: 0.8rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  color: var(--text-muted);
-}
-
-.group-content input[type="text"],
-.group-content input[type="email"],
-.group-content input[type="number"],
-.group-content textarea {
-  width: 100%;
-  padding: 8px 12px;
-  font-size: 0.9rem;
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  background-color: #ffffff;
-  color: var(--text-main);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.group-content input[type="color"] {
-  width: 100%;
-  height: 40px;
-  padding: 2px;
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  cursor: pointer;
-  background-color: #ffffff;
-}
-
-.group-content input:focus,
-.group-content textarea:focus {
-  outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
-}
-
-.group-content textarea {
-  min-height: 80px;
-  resize: vertical;
-}
-
-/* --- CARTES DYNAMIQUES (Chambres, Resto, Services) --- */
-.customizer-item-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 12px;
-  margin-bottom: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.customizer-category-card {
-  background: #f1f5f9;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  padding: 12px;
-  margin-bottom: 16px;
-}
-
-.customizer-category-card h3 {
-  font-size: 1rem;
-  color: var(--primary-color);
-  margin-bottom: 10px;
-}
-
-/* --- SÉLECTEUR VISUEL D'IMAGES --- */
-.image-picker-control {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
+/* --- CARTES DYNAMIQUES (CHAMBRES, RESTAURANT, SERVICES) --- */
+.customizer-card {
   background: #ffffff;
-  padding: 6px;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border: 1px solid var(--cust-border);
+  border-radius: var(--cust-radius);
+  padding: 0.85rem;
+  margin-bottom: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
-.image-preview-wrapper {
-  transition: border-color 0.2s ease;
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--cust-border);
 }
 
-.image-preview-wrapper:hover {
-  border-color: var(--primary-color);
+.card-header h4 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--cust-text);
 }
 
-.btn-change, .btn-delete {
-  font-family: var(--font-family);
-  transition: opacity 0.2s ease;
+/* --- FORMULAIRES & CHAMPS --- */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
 }
 
-.btn-change:hover, .btn-delete:hover {
-  opacity: 0.9;
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
 }
 
-/* --- ZONE D'APERÇU EN TEMPS RÉEL (DROITE) --- */
+.form-group label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--cust-text-muted);
+}
+
+input[type="text"],
+input[type="number"],
+input[type="email"],
+textarea,
+select {
+  width: 100%;
+  padding: 0.5rem 0.65rem;
+  font-size: 0.85rem;
+  border: 1px solid var(--cust-border);
+  border-radius: 6px;
+  background-color: #ffffff;
+  color: var(--cust-text);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="email"]:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--cust-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+input[type="color"] {
+  -webkit-appearance: none;
+  border: 1px solid var(--cust-border);
+  border-radius: 6px;
+  width: 100%;
+  height: 36px;
+  cursor: pointer;
+  padding: 2px;
+  background: #ffffff;
+}
+
+input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+input[type="color"]::-webkit-color-swatch {
+  border: none;
+  border-radius: 4px;
+}
+
+/* --- BOUTONS --- */
+button {
+  font-family: inherit;
+  font-size: 0.825rem;
+  font-weight: 600;
+  padding: 0.5rem 0.85rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-primary { background-color: var(--cust-primary); color: #ffffff; flex: 1; }
+.btn-primary:hover { background-color: var(--cust-primary-hover); }
+
+.btn-secondary { background-color: #e2e8f0; color: var(--cust-text); }
+.btn-secondary:hover { background-color: #cbd5e1; }
+
+.btn-success { background-color: var(--cust-success); color: #ffffff; flex: 1; }
+.btn-success:hover { background-color: var(--cust-success-hover); }
+
+.btn-warning { background-color: var(--cust-warning); color: #ffffff; flex: 1; }
+.btn-warning:hover { background-color: var(--cust-warning-hover); }
+
+.btn-danger { background-color: var(--cust-danger); color: #ffffff; }
+.btn-danger:hover { background-color: var(--cust-danger-hover); }
+
+.btn-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  border-radius: 4px;
+}
+
+.btn-block {
+  width: 100%;
+}
+
+/* --- GALERIE MINIATURES ET UPLOAD D'IMAGES --- */
+.images-preview-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+  margin-bottom: 0.5rem;
+}
+
+.image-thumb-box {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--cust-border);
+  background-color: #f1f5f9;
+}
+
+.thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.btn-thumb-remove {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border-radius: 50%;
+  background-color: rgba(220, 38, 38, 0.85);
+  color: #ffffff;
+  font-size: 11px;
+  line-height: 1;
+}
+
+.btn-thumb-remove:hover {
+  background-color: var(--cust-danger);
+}
+
+.image-add-controls {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.image-add-controls input[type="text"] {
+  flex: 1;
+}
+
+/* --- PRÉVISUALISATION TEMPS RÉEL (DROITE) --- */
 .customizer-preview {
   flex: 1;
-  height: 100%;
+  height: 100vh;
   background-color: #1e293b;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 16px;
+  padding: 1rem;
 }
 
-#preview-iframe {
+.customizer-preview iframe {
   width: 100%;
   height: 100%;
-  background-color: #ffffff;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--cust-radius);
+  background-color: #ffffff;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
-}
-
-/* Personnalisation de la barre de défilement */
-.customizer-sections::-webkit-scrollbar {
-  width: 6px;
-}
-.customizer-sections::-webkit-scrollbar-track {
-  background: transparent;
-}
-.customizer-sections::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 3px;
-}
-.customizer-sections::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
 }

@@ -1,113 +1,172 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#081012" />
-  <meta name="robots" content="index, follow" />
-  <meta name="description" content="Réservez votre chambre, votre suite ou vos options bien-être au Jardin Étoilé." />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <title>Réservation | Le Jardin Étoilé</title>
-</head>
-<body>
-  <a class="skip-link" href="#main-content">Passer au contenu</a>
-  <div class="page-wrapper">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title data-config="site.name">Réservation — L'Écrin & Table</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!-- En-tête / Navigation -->
     <header class="site-header">
-      <a href="index.html" class="site-logo">
-        <span class="brand-name">Le Jardin Étoilé</span>
-        <span class="brand-subtitle">Hôtel, Spa &amp; Gastronomie</span>
-      </a>
-      <button class="nav-toggle" aria-label="Ouvrir le menu" aria-expanded="false">
-        <span class="hamburger"></span>
-      </button>
-      <nav id="nav-main" class="nav-list" role="navigation" aria-label="Menu principal">
-        <a href="index.html">Accueil</a>
-        <a href="menu.html">Menu</a>
-        <a href="reservation.html" class="active">Réservation</a>
-        <a href="gallery.html">Galerie</a>
-        <a href="histoire.html">Histoire</a>
-        <a href="contact.html">Contact</a>
-      </nav>
+      <div class="header-container">
+        <a href="index.html" class="logo-link">
+          <img src="" alt="Logo" class="site-logo" data-config="site.logo" />
+          <span class="site-name" data-config="site.name">L'Écrin & Table</span>
+        </a>
+        <nav class="main-nav">
+          <a href="index.html">Accueil</a>
+          <a href="index.html#chambres">Chambres</a>
+          <a href="index.html#restaurant">Restaurant</a>
+          <a href="reservation.html" class="active">Réservation</a>
+        </nav>
+      </div>
     </header>
 
-    <main id="main-content" class="container">
-      <h1>Réserver votre séjour</h1>
-      <p class="subtitle">Chambres, suites &amp; options bien-être</p>
+    <!-- Section principale de réservation -->
+    <main class="reservation-page">
+      <section class="reservation-hero">
+        <h1>Réserver votre séjour</h1>
+        <p>
+          Sélectionnez vos dates et personnalisez vos prestations en quelques
+          clics.
+        </p>
+      </section>
 
-      <form id="reservation-form" class="form-card mt-lg" novalidate>
+      <div class="reservation-container">
+        <!-- Formulaire principal -->
+        <form
+          id="reservation-form"
+          class="booking-form"
+          data-next-step="confirmation.html"
+        >
+          <!-- Étape 1 : Choix de la chambre -->
+          <fieldset class="form-section">
+            <legend>1. Votre Hébergement</legend>
+            <div class="form-group">
+              <label for="room-select">Sélectionnez une chambre :</label>
+              <select id="room-select" name="room" required>
+                <option value="">Chargement des séjours disponibles...</option>
+              </select>
+            </div>
+          </fieldset>
 
-        <h2 class="step-title">1. Votre chambre &amp; vos dates</h2>
-        <div class="form-group">
-          <label for="service-type">Chambre ou suite</label>
-          <select id="service-type" name="service-type" required>
-            <option value="" disabled selected>Choisissez une chambre</option>
-            <option value="simple">Chambre Simple — 160 €/nuit</option>
-            <option value="double">Chambre Double — 230 €/nuit</option>
-            <option value="familiale">Chambre Familiale — 310 €/nuit</option>
-            <option value="suite-prestige">Suite Prestige — 420 €/nuit</option>
-            <option value="suite-familiale">Suite Familiale — 540 €/nuit</option>
-            <option value="suite-royale">Suite Royale Étoilée — 750 €/nuit</option>
-          </select>
-        </div>
+          <!-- Étape 2 : Dates & Occupants -->
+          <fieldset class="form-section">
+            <legend>2. Dates & Vrais voyageurs</legend>
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="checkin">Date d'arrivée :</label>
+                <input type="date" id="checkin" name="checkin" required />
+              </div>
 
-        <div class="grid grid-3">
-          <div class="form-group">
-            <label for="checkin">Arrivée</label>
-            <input type="date" id="checkin" name="checkin" required>
+              <div class="form-group">
+                <label for="checkout">Date de départ :</label>
+                <input type="date" id="checkout" name="checkout" required />
+              </div>
+
+              <div class="form-group">
+                <label for="guests">Nombre de personnes :</label>
+                <select id="guests" name="guests" required>
+                  <option value="1">1 Personne</option>
+                  <option value="2" selected>2 Personnes</option>
+                  <option value="3">3 Personnes</option>
+                  <option value="4">4 Personnes</option>
+                </select>
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- Étape 3 : Prestations complémentaires -->
+          <fieldset class="form-section">
+            <legend>3. Options & Services</legend>
+            <div class="options-list">
+              <label class="checkbox-label">
+                <input
+                  type="checkbox"
+                  name="options[]"
+                  value="petit-dejeuner"
+                  class="reservation-option"
+                  data-price="22"
+                  data-per-night="true"
+                />
+                <span>Petit-déjeuner gastronomique (+22 € / nuit / pers.)</span>
+              </label>
+
+              <label class="checkbox-label">
+                <input
+                  type="checkbox"
+                  name="options[]"
+                  value="acces-spa"
+                  class="reservation-option"
+                  data-price="45"
+                  data-per-night="false"
+                />
+                <span>Pass Spa & Bien-être illimité (+45 € / séjour)</span>
+              </label>
+
+              <label class="checkbox-label">
+                <input
+                  type="checkbox"
+                  name="options[]"
+                  value="navette-aeroport"
+                  class="reservation-option"
+                  data-price="60"
+                  data-per-night="false"
+                />
+                <span>Transfert navette privée (+60 € / trajet)</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <!-- Synthèse du tarif -->
+          <div class="booking-summary-box">
+            <h3>Récapitulatif de la réservation</h3>
+            <div class="summary-line">
+              <span>Durée du séjour :</span>
+              <strong id="summary-nights" data-summary="nights">0 nuit</strong>
+            </div>
+            <div class="summary-line">
+              <span>Tarif chambre :</span>
+              <strong id="summary-room-price" data-summary="room-price"
+                >0 €</strong
+              >
+            </div>
+            <hr />
+            <div class="summary-line total-line">
+              <span>Total estimé :</span>
+              <strong id="summary-total" data-summary="total">0,00 €</strong>
+            </div>
+
+            <button
+              type="submit"
+              id="btn-submit-booking"
+              class="btn-primary btn-block"
+              disabled
+            >
+              Confirmer la réservation
+            </button>
           </div>
-          <div class="form-group">
-            <label for="checkout">Départ</label>
-            <input type="date" id="checkout" name="checkout" required>
-          </div>
-          <div class="form-group">
-            <label for="guests">Voyageurs</label>
-            <input type="number" id="guests" name="guests" min="1" max="6" value="2" required>
-          </div>
-        </div>
-
-        <h2 class="step-title">2. Options</h2>
-        <label class="form-check">
-          <input type="checkbox" id="opt-minibar" name="opt-minibar">
-          <span>Minibar Premium — <span class="price-hint">+25 €/nuit</span></span>
-        </label>
-        <label class="form-check">
-          <input type="checkbox" id="opt-spa" name="opt-spa">
-          <span>Accès Spa &amp; Soin Massage — <span class="price-hint">+90 €/personne</span></span>
-        </label>
-
-        <h2 class="step-title">3. Vos coordonnées</h2>
-        <div class="grid grid-2">
-          <div class="form-group">
-            <label for="res-name">Nom complet</label>
-            <input type="text" id="res-name" name="res-name" required>
-          </div>
-          <div class="form-group">
-            <label for="res-email">Adresse email</label>
-            <input type="email" id="res-email" name="res-email" required>
-          </div>
-        </div>
-
-        <div id="price-summary" class="price-summary" aria-live="polite">
-          Sélectionnez une chambre et des dates valides pour voir le tarif estimé.
-        </div>
-
-        <div id="reservation-error" class="form-error" role="alert"></div>
-
-        <div class="mt-lg">
-          <button type="submit" class="btn-primary">Procéder au paiement sécurisé</button>
-          <p class="form-note">Vous serez redirigé vers la page de paiement sécurisée Stripe. Le Jardin Étoilé ne collecte ni ne stocke jamais vos coordonnées bancaires.</p>
-        </div>
-      </form>
+        </form>
+      </div>
     </main>
 
-    <footer class="footer">
-      <small>© 2026 Le Jardin Étoilé.</small>
+    <!-- Pied de page -->
+    <footer class="site-footer">
+      <div class="footer-container">
+        <p>
+          <span data-config="site.name">L'Écrin & Table</span> — Tous droits
+          réservés.
+        </p>
+        <p>
+          Contact : <span data-config="contact.phone"></span> |
+          <span data-config="contact.email"></span>
+        </p>
+      </div>
     </footer>
-  </div>
-  <script src="scripts.js" defer></script>
-</body>
+
+    <!-- Scripts d'alimentation dynamique & de calcul -->
+    <script src="config-loader.js"></script>
+    <script src="scripts.js"></script>
+  </body>
 </html>

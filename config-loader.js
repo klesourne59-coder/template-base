@@ -114,7 +114,7 @@ function updateElementsImage(selector, src) {
  * Rendu des chambres sur le site principal (avec attributs complets et galeries)
  */
 function renderRoomsList(rooms) {
-  const container = document.querySelector('#rooms-list, [data-config-list="rooms"]');
+  const container = document.querySelector('#rooms-grid, #rooms-list, [data-config-list="rooms"]');
   if (!container) return;
 
   container.innerHTML = rooms.map(room => {
@@ -157,7 +157,7 @@ function renderRoomsList(rooms) {
  * Rendu de la carte du restaurant
  */
 function renderRestaurantList(items) {
-  const container = document.querySelector('#restaurant-list, [data-config-list="restaurant"]');
+  const container = document.querySelector('#restaurant-grid, #restaurant-list, [data-config-list="restaurant"]');
   if (!container) return;
 
   container.innerHTML = items.map(item => `
@@ -179,7 +179,7 @@ function renderRestaurantList(items) {
  * Rendu des services
  */
 function renderServicesList(services) {
-  const container = document.querySelector('#services-list, [data-config-list="services"]');
+  const container = document.querySelector('#services-grid, #services-list, [data-config-list="services"]');
   if (!container) return;
 
   container.innerHTML = services.map(service => `

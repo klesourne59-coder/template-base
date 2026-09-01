@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin - Mon Site</title>
+    <link rel="stylesheet" href="admin.css" />
+  </head>
+  <body>
+    <div class="admin-container">
+      <!-- SIDEBAR NAVIGATION -->
+      <aside class="admin-sidebar">
+        <div class="logo-admin">
+          <h3>⚙️ Mon Admin</h3>
+          <p class="tagline">Gérez votre site facilement</p>
+        </div>
+
+        <nav class="admin-nav">
+          <a href="#dashboard" class="nav-item active" data-section="dashboard">
+            <span class="icon">📊</span> Tableau de bord
+          </a>
+          <a
+            href="#personnalisation"
+            class="nav-item"
+            data-section="personnalisation"
+          >
+            <span class="icon">🎨</span> Personnalisation
+          </a>
+          <a href="#contenu" class="nav-item" data-section="contenu">
+            <span class="icon">📝</span> Contenu
+          </a>
+          <a href="#images" class="nav-item" data-section="images">
+            <span class="icon">🖼️</span> Images
+          </a>
+          <a href="#settings" class="nav-item" data-section="settings">
+            <span class="icon">⚙️</span> Paramètres
+          </a>
+        </nav>
+
+        <div class="admin-footer">
+          <button id="btn-logout" class="btn-logout">🚪 Déconnexion</button>
+        </div>
+      </aside>
+
+      <!-- MAIN CONTENT -->
+      <main class="admin-main">
+        <!-- HEADER -->
+        <header class="admin-header">
+          <h1>Bienvenue dans votre Admin</h1>
+          <div class="header-actions">
+            <button id="btn-preview" class="btn-preview">
+              👁️ Prévisualiser
+            </button>
+            <button id="btn-save" class="btn-save">💾 Sauvegarder</button>
+          </div>
+        </header>
+
+        <!-- CONTENT AREA -->
+        <div class="admin-content">
+          <!-- 1. DASHBOARD -->
+          <section id="dashboard" class="admin-section active">
+            <h2>Tableau de Bord</h2>
+
+            <div class="dashboard-grid">
+              <div class="dashboard-card">
+                <h3>🏠 Votre Site</h3>
+                <p id="dashboard-sitename">Chargement...</p>
+                <a href="../index.html" target="_blank" class="btn-link"
+                  >Voir le site →</a
+                >
+              </div>
+
+              <div class="dashboard-card">
+                <h3>🎨 Couleurs</h3>
+                <div class="color-preview">
+                  <div
+                    class="color-box"
+                    id="color-primary"
+                    style="background: #1b365d;"
+                  ></div>
+                  <div
+                    class="color-box"
+                    id="color-secondary"
+                    style="background: #c5a059;"
+                  ></div>
+                  <div
+                    class="color-box"
+                    id="color-accent"
+                    style="background: #d4af37;"
+                  ></div>
+                </div>
+                <p class="small-text">
+                  Cliquez sur "Personnalisation" pour les modifier
+                </p>
+              </div>
+
+              <div class="dashboard-card">
+                <h3>📸 Galerie</h3>
+                <p id="dashboard-images">0 images</p>
+                <p class="small-text">Allez dans "Images" pour en ajouter</p>
+              </div>
+
+              <div class="dashboard-card">
+                <h3>✅ Statut</h3>
+                <p class="status-ok">✓ Tout fonctionne</p>
+                <p class="small-text">
+                  Dernière sauvegarde : <span id="last-save">Jamais</span>
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <!-- 2. PERSONNALISATION -->
+          <section id="personnalisation" class="admin-section">
+            <h2>🎨 Personnaliser votre site</h2>
+
+            <div class="form-group">
+              <label>Couleur principale</label>
+              <div class="color-input-group">
+                <input type="color" id="color-input-primary" value="#1b365d" />
+                <span id="color-value-primary">#1b365d</span>
+              </div>
+              <p class="help-text">
+                Utilisée pour les titres et les boutons principaux
+              </p>
+            </div>
+
+            <div class="form-group">
+              <label>Couleur secondaire (Or/Accent)</label>
+              <div class="color-input-group">
+                <input
+                  type="color"
+                  id="color-input-secondary"
+                  value="#c5a059"
+                />
+                <span id="color-value-secondary">#c5a059</span>
+              </div>
+              <p class="help-text">Utilisée pour les détails et les accents</p>
+            </div>
+
+            <div class="form-group">
+              <label>Couleur d'accentuation (Or Clair)</label>
+              <div class="color-input-group">
+                <input type="color" id="color-input-accent" value="#d4af37" />
+                <span id="color-value-accent">#d4af37</span>
+              </div>
+              <p class="help-text">Utilisée pour les mises en avant</p>
+            </div>
+
+            <hr style="margin: 2rem 0;" />
+
+            <h3>Police d'écriture</h3>
+
+            <div class="form-group">
+              <label>Police des titres</label>
+              <select id="font-heading">
+                <option value="'Playfair Display', serif">
+                  Playfair Display (Élégant)
+                </option>
+                <option value="'Georgia', serif">Georgia (Classique)</option>
+                <option value="'Cormorant Garamond', serif">
+                  Cormorant Garamond (Raffiné)
+                </option>
+                <option value="'Montserrat', sans-serif">
+                  Montserrat (Moderne)
+                </option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Police du texte</label>
+              <select id="font-body">
+                <option value="'Montserrat', sans-serif">
+                  Montserrat (Moderne)
+                </option>
+                <option value="'Open Sans', sans-serif">
+                  Open Sans (Lisible)
+                </option>
+                <option value="'Lato', sans-serif">Lato (Équilibré)</option>
+                <option value="'Roboto', sans-serif">Roboto (Propre)</option>
+              </select>
+            </div>
+          </section>
+
+          <!-- 3. CONTENU -->
+          <section id="contenu" class="admin-section">
+            <h2>📝 Contenu du site</h2>
+
+            <div class="form-group">
+              <label>Nom de votre établissement</label>
+              <input
+                type="text"
+                id="site-name"
+                placeholder="ex: L'Écrin & Table"
+              />
+              <p class="help-text">
+                C'est le nom qui apparaît partout sur le site
+              </p>
+            </div>
+
+            <div class="form-group">
+              <label>Slogan / Tagline</label>
+              <input
+                type="text"
+                id="site-tagline"
+                placeholder="ex: Hôtel de charme & restaurant gastronomique"
+              />
+            </div>
+
+            <hr style="margin: 2rem 0;" />
+
+            <h3>Page d'accueil</h3>
+
+            <div class="form-group">
+              <label>Titre principal (Hero)</label>
+              <input
+                type="text"
+                id="hero-title"
+                placeholder="ex: Une expérience d'exception"
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Sous-titre</label>
+              <textarea
+                id="hero-subtitle"
+                placeholder="ex: Hôtel de charme & restaurant gastronomique au cœur de la nature."
+              ></textarea>
+            </div>
+
+            <hr style="margin: 2rem 0;" />
+
+            <h3>Coordonnées</h3>
+
+            <div class="form-group">
+              <label>Téléphone</label>
+              <input
+                type="tel"
+                id="contact-phone"
+                placeholder="+33 1 23 45 67 89"
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Email</label>
+              <input
+                type="email"
+                id="contact-email"
+                placeholder="contact@example.com"
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Adresse</label>
+              <input
+                type="text"
+                id="contact-address"
+                placeholder="123 rue de Paris, 75000 Paris"
+              />
+            </div>
+          </section>
+
+          <!-- 4. IMAGES -->
+          <section id="images" class="admin-section">
+            <h2>🖼️ Galerie d'images</h2>
+
+            <div class="images-section">
+              <h3>Logo de votre site</h3>
+              <div class="image-upload-zone" id="logo-upload">
+                <p>📤 Glissez-déposez votre logo ici</p>
+                <p class="small-text">ou cliquez pour sélectionner</p>
+              </div>
+              <div id="logo-preview" class="image-preview"></div>
+            </div>
+
+            <hr style="margin: 2rem 0;" />
+
+            <div class="images-section">
+              <h3>Images du site</h3>
+              <div class="image-upload-zone" id="images-upload">
+                <p>📤 Glissez-déposez vos images ici</p>
+                <p class="small-text">
+                  ou cliquez pour sélectionner (JPG, PNG)
+                </p>
+              </div>
+              <div id="images-gallery" class="images-gallery"></div>
+            </div>
+          </section>
+
+          <!-- 5. PARAMÈTRES -->
+          <section id="settings" class="admin-section">
+            <h2>⚙️ Paramètres</h2>
+
+            <div class="settings-group">
+              <h3>Données du site</h3>
+              <button class="btn-secondary" id="btn-export">
+                📥 Télécharger la configuration
+              </button>
+              <p class="help-text">
+                Cela télécharge un fichier JSON avec toutes vos données
+              </p>
+            </div>
+
+            <div class="settings-group">
+              <h3>Sécurité</h3>
+              <button class="btn-warning" id="btn-reset">
+                🔄 Réinitialiser le mot de passe
+              </button>
+              <p class="help-text">
+                Vous recevrez un email avec un nouveau mot de passe
+              </p>
+            </div>
+
+            <div class="settings-group">
+              <h3>Danger Zone</h3>
+              <button class="btn-danger" id="btn-reset-all">
+                ⚠️ Réinitialiser le site
+              </button>
+              <p class="help-text">
+                Cela remet le site à zéro. C'est irréversible !
+              </p>
+            </div>
+          </section>
+        </div>
+      </main>
+
+      <!-- PREVIEW PANEL (RIGHT) -->
+      <aside class="admin-preview">
+        <div class="preview-header">
+          <h3>👁️ Aperçu en direct</h3>
+          <button id="btn-close-preview" class="btn-close">×</button>
+        </div>
+        <iframe
+          id="preview-iframe"
+          src="../index.html"
+          frameborder="0"
+        ></iframe>
+      </aside>
+    </div>
+
+    <!-- MODAL POUR CONFIRMER LES ACTIONS -->
+    <div id="modal-confirm" class="modal">
+      <div class="modal-content">
+        <h3 id="modal-title">Confirmation</h3>
+        <p id="modal-message"></p>
+        <div class="modal-actions">
+          <button id="modal-cancel" class="btn-secondary">Annuler</button>
+          <button id="modal-confirm" class="btn-danger">Confirmer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOAST NOTIFICATIONS -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="admin.js" defer></script>
+  </body>
+</html>
